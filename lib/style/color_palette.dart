@@ -8,6 +8,10 @@ class ColorPalette {
   Color get userLoginBackground => const Color.fromRGBO(255, 255, 255, 1.0);
   Color get floatingActionButton => const Color.fromRGBO(197, 168, 255, 1.0);
 
+  Color get iconButtonColor => const Color.fromRGBO(197, 168, 255, 1.0);
+
+  Color get appBarIndicator => const Color.fromRGBO(215, 215, 248, 1.0);
+
   Color get snackBarError => const Color.fromRGBO(220, 9, 36, 1.0);
   Color get snackBarWarning => const Color.fromRGBO(213, 70, 9, 1.0);
 }

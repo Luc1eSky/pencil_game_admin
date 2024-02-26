@@ -16,7 +16,9 @@ class Experiment with _$Experiment {
     required String createdByUid,
     @TimestampConverter() required DateTime createdOn,
     required ExperimentStatus status,
-    required int userCount,
+    // required int userCount,
+    // required int tableCount,
+    // required int numberOfRounds,
   }) = _Experiment;
 
   factory Experiment.fromJson(Map<String, dynamic> json) => _$ExperimentFromJson(json);

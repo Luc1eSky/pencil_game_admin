@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pencil_game_admin/constants.dart';
 
 import '../../../style/color_palette.dart';
 import '../../authorize/data/firebase_auth_instance_provider.dart';
@@ -58,7 +59,7 @@ class HomeScreen extends StatelessWidget {
             Expanded(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(
-                  maxWidth: 700,
+                  maxWidth: cardMaxWidth,
                 ),
                 child: const Padding(
                   padding: EdgeInsets.all(10.0),

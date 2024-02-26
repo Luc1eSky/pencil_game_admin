@@ -14,7 +14,6 @@ _$ExperimentImpl _$$ExperimentImplFromJson(Map<String, dynamic> json) =>
       createdOn:
           const TimestampConverter().fromJson(json['createdOn'] as Timestamp),
       status: $enumDecode(_$ExperimentStatusEnumMap, json['status']),
-      userCount: json['userCount'] as int,
     );
 
 Map<String, dynamic> _$$ExperimentImplToJson(_$ExperimentImpl instance) =>
@@ -24,7 +23,6 @@ Map<String, dynamic> _$$ExperimentImplToJson(_$ExperimentImpl instance) =>
       'createdByUid': instance.createdByUid,
       'createdOn': const TimestampConverter().toJson(instance.createdOn),
       'status': _$ExperimentStatusEnumMap[instance.status]!,
-      'userCount': instance.userCount,
     };
 
 const _$ExperimentStatusEnumMap = {

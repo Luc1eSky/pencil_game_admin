@@ -21,7 +21,8 @@ class UserCountWidget extends ConsumerWidget {
             return Container();
           }
           final experiment = Experiment.fromJson(snapshot.data!.data()!);
-          return Text('Users: ${experiment.userCount.toString()}');
+          return const Text('Users: 0'); // ${experiment.userCount.toString()}');
+          // TODO: UPDATE TO READ FROM SCHEDULE
         });
   }
 }

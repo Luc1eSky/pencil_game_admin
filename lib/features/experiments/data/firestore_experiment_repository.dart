@@ -5,6 +5,7 @@ import 'package:pencil_game_admin/firestore/firestore_instance_provider.dart';
 
 import '../../../constants.dart';
 import '../../../utils/utils.dart';
+import '../../schedule/domain/schedule.dart';
 import '../domain/experiment.dart';
 import '../domain/experiment_status.dart';
 
@@ -12,6 +13,7 @@ class FirestoreExperimentRepository {
   FirestoreExperimentRepository(this._firestore);
   final FirebaseFirestore _firestore;
 
+  /// get stream to a specific experiment document
   Stream<DocumentSnapshot<Map<String, dynamic>>> getExperimentStream(String docId) {
     return _firestore.collection(experimentCollectionName).doc(docId).snapshots();
   }
@@ -69,7 +71,9 @@ class FirestoreExperimentRepository {
       createdByUid: adminUid,
       createdOn: DateTime.now(),
       status: ExperimentStatus.scheduled,
-      userCount: 0,
+      // userCount: 0,
+      // tableCount: 0, // TODO: --> SCHEDULE?
+      // numberOfRounds: 0, // TODO: --> SCHEDULE?
     ).toJson();
 
     // add a new document for the experiment
@@ -89,6 +93,21 @@ class FirestoreExperimentRepository {
         .collection('colorCodes')
         .doc('colorCodes')
         .set(colorCodesDocSnap.data()!);
+
+    // create new schedule object
+    Schedule newSchedule = const Schedule(
+      currentRoundNumber: 0,
+      tableCount: 0,
+      numberOfRounds: 0,
+      rounds: [],
+      playerColorCodes: [],
+    );
+
+    // add a new document for the schedule in sub-collection
+    await newExperimentDocRef
+        .collection(scheduleCollectionName)
+        .doc(scheduleDocName)
+        .set(newSchedule.toJson());
   }
 
   // /// get experiment based on unique share code

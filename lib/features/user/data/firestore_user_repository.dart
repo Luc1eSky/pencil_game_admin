@@ -5,6 +5,7 @@ import 'package:pencil_game_admin/constants.dart';
 import 'package:pencil_game_admin/firestore/firestore_instance_provider.dart';
 
 import '../../../utils/utils.dart';
+import '../domain/app_user.dart';
 
 class FirestoreUserRepository {
   FirestoreUserRepository(this._firestore);
@@ -17,6 +18,20 @@ class FirestoreUserRepository {
         .where('code', isEqualTo: code)
         .limit(1)
         .snapshots();
+  }
+
+  /// returns query of all users of a specific experiment
+  Query<AppUser> getUsersQuery(String experimentDocId) {
+    print(experimentDocId);
+    return _firestore
+        .collection(experimentCollectionName)
+        .doc(experimentDocId)
+        .collection(userCollectionName)
+        .orderBy('createdOn')
+        .withConverter(
+          fromFirestore: (snapshot, _) => AppUser.fromFirestore(snapshot.data()!, snapshot.id),
+          toFirestore: (user, _) => user.toFirestore(),
+        );
   }
 
   /// get the next color code in experiment for a new user

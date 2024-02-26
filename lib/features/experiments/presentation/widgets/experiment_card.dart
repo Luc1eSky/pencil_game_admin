@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pencil_game_admin/features/tables/presentation/tables_screen.dart';
+import 'package:pencil_game_admin/features/experiments/presentation/experiment_details_screen.dart';
 
 import '../../../../style/color_palette.dart';
 import '../../../authorize/data/firebase_auth_instance_provider.dart';
@@ -72,8 +72,8 @@ class ExperimentCard extends ConsumerWidget {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return TablesScreen(experiment: experiment, docId: docId);
-                //return ExperimentScreen(experiment: experiment);
+                return ExperimentDetailsScreen(experiment: experiment, docId: docId);
+                //return TablesScreen(experiment: experiment, docId: docId);
               },
             ),
           );

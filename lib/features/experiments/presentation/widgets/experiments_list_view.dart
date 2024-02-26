@@ -103,7 +103,6 @@ class _ExperimentsListViewState extends ConsumerState<ExperimentsListView> {
                         );
                       },
                     );
-                    return Text('Documents found: ${snapshot.data!.docs.length}');
                   },
                 );
 

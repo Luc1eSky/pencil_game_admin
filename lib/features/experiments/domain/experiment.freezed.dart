@@ -12,7 +12,7 @@ part of 'experiment.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Experiment _$ExperimentFromJson(Map<String, dynamic> json) {
   return _Experiment.fromJson(json);
@@ -26,7 +26,6 @@ mixin _$Experiment {
   @TimestampConverter()
   DateTime get createdOn => throw _privateConstructorUsedError;
   ExperimentStatus get status => throw _privateConstructorUsedError;
-  int get userCount => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -45,8 +44,7 @@ abstract class $ExperimentCopyWith<$Res> {
       String location,
       String createdByUid,
       @TimestampConverter() DateTime createdOn,
-      ExperimentStatus status,
-      int userCount});
+      ExperimentStatus status});
 }
 
 /// @nodoc
@@ -67,7 +65,6 @@ class _$ExperimentCopyWithImpl<$Res, $Val extends Experiment>
     Object? createdByUid = null,
     Object? createdOn = null,
     Object? status = null,
-    Object? userCount = null,
   }) {
     return _then(_value.copyWith(
       name: null == name
@@ -90,10 +87,6 @@ class _$ExperimentCopyWithImpl<$Res, $Val extends Experiment>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as ExperimentStatus,
-      userCount: null == userCount
-          ? _value.userCount
-          : userCount // ignore: cast_nullable_to_non_nullable
-              as int,
     ) as $Val);
   }
 }
@@ -111,8 +104,7 @@ abstract class _$$ExperimentImplCopyWith<$Res>
       String location,
       String createdByUid,
       @TimestampConverter() DateTime createdOn,
-      ExperimentStatus status,
-      int userCount});
+      ExperimentStatus status});
 }
 
 /// @nodoc
@@ -131,7 +123,6 @@ class __$$ExperimentImplCopyWithImpl<$Res>
     Object? createdByUid = null,
     Object? createdOn = null,
     Object? status = null,
-    Object? userCount = null,
   }) {
     return _then(_$ExperimentImpl(
       name: null == name
@@ -154,10 +145,6 @@ class __$$ExperimentImplCopyWithImpl<$Res>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as ExperimentStatus,
-      userCount: null == userCount
-          ? _value.userCount
-          : userCount // ignore: cast_nullable_to_non_nullable
-              as int,
     ));
   }
 }
@@ -170,8 +157,7 @@ class _$ExperimentImpl extends _Experiment {
       required this.location,
       required this.createdByUid,
       @TimestampConverter() required this.createdOn,
-      required this.status,
-      required this.userCount})
+      required this.status})
       : super._();
 
   factory _$ExperimentImpl.fromJson(Map<String, dynamic> json) =>
@@ -188,12 +174,10 @@ class _$ExperimentImpl extends _Experiment {
   final DateTime createdOn;
   @override
   final ExperimentStatus status;
-  @override
-  final int userCount;
 
   @override
   String toString() {
-    return 'Experiment(name: $name, location: $location, createdByUid: $createdByUid, createdOn: $createdOn, status: $status, userCount: $userCount)';
+    return 'Experiment(name: $name, location: $location, createdByUid: $createdByUid, createdOn: $createdOn, status: $status)';
   }
 
   @override
@@ -208,15 +192,13 @@ class _$ExperimentImpl extends _Experiment {
                 other.createdByUid == createdByUid) &&
             (identical(other.createdOn, createdOn) ||
                 other.createdOn == createdOn) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.userCount, userCount) ||
-                other.userCount == userCount));
+            (identical(other.status, status) || other.status == status));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, name, location, createdByUid, createdOn, status, userCount);
+  int get hashCode =>
+      Object.hash(runtimeType, name, location, createdByUid, createdOn, status);
 
   @JsonKey(ignore: true)
   @override
@@ -238,8 +220,7 @@ abstract class _Experiment extends Experiment {
       required final String location,
       required final String createdByUid,
       @TimestampConverter() required final DateTime createdOn,
-      required final ExperimentStatus status,
-      required final int userCount}) = _$ExperimentImpl;
+      required final ExperimentStatus status}) = _$ExperimentImpl;
   const _Experiment._() : super._();
 
   factory _Experiment.fromJson(Map<String, dynamic> json) =
@@ -256,8 +237,6 @@ abstract class _Experiment extends Experiment {
   DateTime get createdOn;
   @override
   ExperimentStatus get status;
-  @override
-  int get userCount;
   @override
   @JsonKey(ignore: true)
   _$$ExperimentImplCopyWith<_$ExperimentImpl> get copyWith =>

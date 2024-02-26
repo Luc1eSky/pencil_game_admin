@@ -4,16 +4,18 @@ import '../../../../constants.dart';
 import '../../../../style/color_palette.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  const CustomAppBar({super.key, this.text});
+
+  final String? text;
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text(appName),
+      title: Text(text ?? appName),
       backgroundColor: ColorPalette().appBarBackground,
     );
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(appBarHeight);
+  Size get preferredSize => const Size.fromHeight(appBarHeight);
 }

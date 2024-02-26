@@ -12,7 +12,7 @@ part of 'app_user.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 AppUser _$AppUserFromJson(Map<String, dynamic> json) {
   return _AppUser.fromJson(json);
@@ -23,6 +23,7 @@ mixin _$AppUser {
   String get firstName => throw _privateConstructorUsedError;
   String get lastName => throw _privateConstructorUsedError;
   String get uid => throw _privateConstructorUsedError;
+  String get colorCode => throw _privateConstructorUsedError;
   String get experimentDocId => throw _privateConstructorUsedError;
   @TimestampConverter()
   DateTime get createdOn => throw _privateConstructorUsedError;
@@ -41,6 +42,7 @@ abstract class $AppUserCopyWith<$Res> {
       {String firstName,
       String lastName,
       String uid,
+      String colorCode,
       String experimentDocId,
       @TimestampConverter() DateTime createdOn});
 }
@@ -61,6 +63,7 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
     Object? firstName = null,
     Object? lastName = null,
     Object? uid = null,
+    Object? colorCode = null,
     Object? experimentDocId = null,
     Object? createdOn = null,
   }) {
@@ -76,6 +79,10 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
       uid: null == uid
           ? _value.uid
           : uid // ignore: cast_nullable_to_non_nullable
+              as String,
+      colorCode: null == colorCode
+          ? _value.colorCode
+          : colorCode // ignore: cast_nullable_to_non_nullable
               as String,
       experimentDocId: null == experimentDocId
           ? _value.experimentDocId
@@ -100,6 +107,7 @@ abstract class _$$AppUserImplCopyWith<$Res> implements $AppUserCopyWith<$Res> {
       {String firstName,
       String lastName,
       String uid,
+      String colorCode,
       String experimentDocId,
       @TimestampConverter() DateTime createdOn});
 }
@@ -118,6 +126,7 @@ class __$$AppUserImplCopyWithImpl<$Res>
     Object? firstName = null,
     Object? lastName = null,
     Object? uid = null,
+    Object? colorCode = null,
     Object? experimentDocId = null,
     Object? createdOn = null,
   }) {
@@ -134,6 +143,10 @@ class __$$AppUserImplCopyWithImpl<$Res>
           ? _value.uid
           : uid // ignore: cast_nullable_to_non_nullable
               as String,
+      colorCode: null == colorCode
+          ? _value.colorCode
+          : colorCode // ignore: cast_nullable_to_non_nullable
+              as String,
       experimentDocId: null == experimentDocId
           ? _value.experimentDocId
           : experimentDocId // ignore: cast_nullable_to_non_nullable
@@ -148,13 +161,15 @@ class __$$AppUserImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$AppUserImpl implements _AppUser {
+class _$AppUserImpl extends _AppUser {
   const _$AppUserImpl(
       {required this.firstName,
       required this.lastName,
       required this.uid,
+      required this.colorCode,
       required this.experimentDocId,
-      @TimestampConverter() required this.createdOn});
+      @TimestampConverter() required this.createdOn})
+      : super._();
 
   factory _$AppUserImpl.fromJson(Map<String, dynamic> json) =>
       _$$AppUserImplFromJson(json);
@@ -166,6 +181,8 @@ class _$AppUserImpl implements _AppUser {
   @override
   final String uid;
   @override
+  final String colorCode;
+  @override
   final String experimentDocId;
   @override
   @TimestampConverter()
@@ -173,7 +190,7 @@ class _$AppUserImpl implements _AppUser {
 
   @override
   String toString() {
-    return 'AppUser(firstName: $firstName, lastName: $lastName, uid: $uid, experimentDocId: $experimentDocId, createdOn: $createdOn)';
+    return 'AppUser(firstName: $firstName, lastName: $lastName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, createdOn: $createdOn)';
   }
 
   @override
@@ -186,6 +203,8 @@ class _$AppUserImpl implements _AppUser {
             (identical(other.lastName, lastName) ||
                 other.lastName == lastName) &&
             (identical(other.uid, uid) || other.uid == uid) &&
+            (identical(other.colorCode, colorCode) ||
+                other.colorCode == colorCode) &&
             (identical(other.experimentDocId, experimentDocId) ||
                 other.experimentDocId == experimentDocId) &&
             (identical(other.createdOn, createdOn) ||
@@ -194,8 +213,8 @@ class _$AppUserImpl implements _AppUser {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, firstName, lastName, uid, experimentDocId, createdOn);
+  int get hashCode => Object.hash(runtimeType, firstName, lastName, uid,
+      colorCode, experimentDocId, createdOn);
 
   @JsonKey(ignore: true)
   @override
@@ -211,13 +230,15 @@ class _$AppUserImpl implements _AppUser {
   }
 }
 
-abstract class _AppUser implements AppUser {
+abstract class _AppUser extends AppUser {
   const factory _AppUser(
       {required final String firstName,
       required final String lastName,
       required final String uid,
+      required final String colorCode,
       required final String experimentDocId,
       @TimestampConverter() required final DateTime createdOn}) = _$AppUserImpl;
+  const _AppUser._() : super._();
 
   factory _AppUser.fromJson(Map<String, dynamic> json) = _$AppUserImpl.fromJson;
 
@@ -227,6 +248,8 @@ abstract class _AppUser implements AppUser {
   String get lastName;
   @override
   String get uid;
+  @override
+  String get colorCode;
   @override
   String get experimentDocId;
   @override
