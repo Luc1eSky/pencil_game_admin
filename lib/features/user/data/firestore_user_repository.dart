@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_admin/constants.dart';
+import 'package:pencil_game_admin/features/schedule/domain/detailed_round.dart';
 import 'package:pencil_game_admin/firestore/firestore_instance_provider.dart';
 
 import '../../../utils/utils.dart';
@@ -22,7 +23,6 @@ class FirestoreUserRepository {
 
   /// returns query of all users of a specific experiment
   Query<AppUser> getUsersQuery(String experimentDocId) {
-    print(experimentDocId);
     return _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
@@ -112,6 +112,7 @@ class FirestoreUserRepository {
         'colorCode': colorCode,
         'experimentDocId': experimentDocId,
         'createdOn': Timestamp.now(),
+        'currentTableNumber': null,
       });
 
       // return user uid
@@ -119,6 +120,34 @@ class FirestoreUserRepository {
     } catch (e) {
       debugPrint('Error: $e');
       return null;
+    }
+  }
+
+  void changeCurrentTableNumbers(String experimentDocId, DetailedRound round) {
+    for (var game in round.games) {
+      final listOfUserUids = game.userPair.map((u) => u.uid).toList();
+      final tableNumber = game.tableNumber;
+
+      // update User documents with table numbers
+      for (var uid in listOfUserUids) {
+        _firestore
+            .collection(experimentCollectionName)
+            .doc(experimentDocId)
+            .collection(userCollectionName)
+            .doc(uid)
+            .update({'currentTableNumber': tableNumber});
+      }
+    }
+
+    final listOfPausingUids = round.pausingUsers.map((u) => u.uid).toList();
+    // update User documents with 0 for pausing players
+    for (var uid in listOfPausingUids) {
+      _firestore
+          .collection(experimentCollectionName)
+          .doc(experimentDocId)
+          .collection(userCollectionName)
+          .doc(uid)
+          .update({'currentTableNumber': 0});
     }
   }
 }

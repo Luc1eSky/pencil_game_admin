@@ -21,40 +21,72 @@ class CountIncrementer extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: ColorPalette().iconButtonColor,
-          ),
-          child: IconButton(
-            onPressed: isBlocked
-                ? null
-                : () {
-                    subtract();
-                  },
-            icon: const Icon(Icons.remove),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 60),
+              child: Center(
+                child: FractionallySizedBox(
+                  widthFactor: 0.8,
+                  heightFactor: 0.8,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: ColorPalette().iconButtonColor,
+                    ),
+                    child: FittedBox(
+                      child: IconButton(
+                        iconSize: 25,
+                        onPressed: isBlocked
+                            ? null
+                            : () async {
+                                await subtract();
+                              },
+                        icon: const Icon(Icons.remove),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 10),
         FittedBox(
           child: Text(
             count?.toString() ?? ' ',
-            style: const TextStyle(fontSize: 100),
+            style: const TextStyle(fontSize: 200),
           ),
         ),
-        const SizedBox(width: 10),
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: ColorPalette().iconButtonColor,
-          ),
-          child: IconButton(
-            onPressed: isBlocked
-                ? null
-                : () async {
-                    await add();
-                  },
-            icon: const Icon(Icons.add),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 60),
+              child: Center(
+                child: FractionallySizedBox(
+                  widthFactor: 0.8,
+                  heightFactor: 0.8,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: ColorPalette().iconButtonColor,
+                    ),
+                    child: FittedBox(
+                      child: IconButton(
+                        iconSize: 25,
+                        onPressed: isBlocked
+                            ? null
+                            : () async {
+                                await add();
+                              },
+                        icon: const Icon(Icons.add),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ],

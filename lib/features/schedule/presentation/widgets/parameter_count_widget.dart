@@ -5,10 +5,12 @@ class ParameterCountWidget extends StatelessWidget {
     super.key,
     required this.text,
     required this.child,
+    required this.hasChanged,
   });
 
   final String text;
   final Widget child;
+  final bool hasChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,10 @@ class ParameterCountWidget extends StatelessWidget {
           child: FittedBox(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 100),
+              style: TextStyle(
+                fontSize: 100,
+                color: hasChanged ? Colors.red : Colors.black,
+              ),
             ),
           ),
         ),

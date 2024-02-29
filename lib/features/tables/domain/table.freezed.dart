@@ -20,8 +20,9 @@ Table _$TableFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Table {
-  String? get player1 => throw _privateConstructorUsedError;
-  String? get player2 => throw _privateConstructorUsedError;
+  int get tableNumber => throw _privateConstructorUsedError;
+  Set<AppUser> get assignedUsers => throw _privateConstructorUsedError;
+  Set<AppUser> get signedInUsers => throw _privateConstructorUsedError;
   TableStatus get status => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -34,7 +35,11 @@ abstract class $TableCopyWith<$Res> {
   factory $TableCopyWith(Table value, $Res Function(Table) then) =
       _$TableCopyWithImpl<$Res, Table>;
   @useResult
-  $Res call({String? player1, String? player2, TableStatus status});
+  $Res call(
+      {int tableNumber,
+      Set<AppUser> assignedUsers,
+      Set<AppUser> signedInUsers,
+      TableStatus status});
 }
 
 /// @nodoc
@@ -50,19 +55,24 @@ class _$TableCopyWithImpl<$Res, $Val extends Table>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? player1 = freezed,
-    Object? player2 = freezed,
+    Object? tableNumber = null,
+    Object? assignedUsers = null,
+    Object? signedInUsers = null,
     Object? status = null,
   }) {
     return _then(_value.copyWith(
-      player1: freezed == player1
-          ? _value.player1
-          : player1 // ignore: cast_nullable_to_non_nullable
-              as String?,
-      player2: freezed == player2
-          ? _value.player2
-          : player2 // ignore: cast_nullable_to_non_nullable
-              as String?,
+      tableNumber: null == tableNumber
+          ? _value.tableNumber
+          : tableNumber // ignore: cast_nullable_to_non_nullable
+              as int,
+      assignedUsers: null == assignedUsers
+          ? _value.assignedUsers
+          : assignedUsers // ignore: cast_nullable_to_non_nullable
+              as Set<AppUser>,
+      signedInUsers: null == signedInUsers
+          ? _value.signedInUsers
+          : signedInUsers // ignore: cast_nullable_to_non_nullable
+              as Set<AppUser>,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -78,7 +88,11 @@ abstract class _$$TableImplCopyWith<$Res> implements $TableCopyWith<$Res> {
       __$$TableImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String? player1, String? player2, TableStatus status});
+  $Res call(
+      {int tableNumber,
+      Set<AppUser> assignedUsers,
+      Set<AppUser> signedInUsers,
+      TableStatus status});
 }
 
 /// @nodoc
@@ -92,19 +106,24 @@ class __$$TableImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? player1 = freezed,
-    Object? player2 = freezed,
+    Object? tableNumber = null,
+    Object? assignedUsers = null,
+    Object? signedInUsers = null,
     Object? status = null,
   }) {
     return _then(_$TableImpl(
-      player1: freezed == player1
-          ? _value.player1
-          : player1 // ignore: cast_nullable_to_non_nullable
-              as String?,
-      player2: freezed == player2
-          ? _value.player2
-          : player2 // ignore: cast_nullable_to_non_nullable
-              as String?,
+      tableNumber: null == tableNumber
+          ? _value.tableNumber
+          : tableNumber // ignore: cast_nullable_to_non_nullable
+              as int,
+      assignedUsers: null == assignedUsers
+          ? _value._assignedUsers
+          : assignedUsers // ignore: cast_nullable_to_non_nullable
+              as Set<AppUser>,
+      signedInUsers: null == signedInUsers
+          ? _value._signedInUsers
+          : signedInUsers // ignore: cast_nullable_to_non_nullable
+              as Set<AppUser>,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -115,24 +134,55 @@ class __$$TableImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$TableImpl implements _Table {
+class _$TableImpl extends _Table with DiagnosticableTreeMixin {
   const _$TableImpl(
-      {this.player1, this.player2, this.status = TableStatus.empty});
+      {required this.tableNumber,
+      required final Set<AppUser> assignedUsers,
+      required final Set<AppUser> signedInUsers,
+      this.status = TableStatus.waiting})
+      : _assignedUsers = assignedUsers,
+        _signedInUsers = signedInUsers,
+        super._();
 
   factory _$TableImpl.fromJson(Map<String, dynamic> json) =>
       _$$TableImplFromJson(json);
 
   @override
-  final String? player1;
+  final int tableNumber;
+  final Set<AppUser> _assignedUsers;
   @override
-  final String? player2;
+  Set<AppUser> get assignedUsers {
+    if (_assignedUsers is EqualUnmodifiableSetView) return _assignedUsers;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableSetView(_assignedUsers);
+  }
+
+  final Set<AppUser> _signedInUsers;
+  @override
+  Set<AppUser> get signedInUsers {
+    if (_signedInUsers is EqualUnmodifiableSetView) return _signedInUsers;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableSetView(_signedInUsers);
+  }
+
   @override
   @JsonKey()
   final TableStatus status;
 
   @override
-  String toString() {
-    return 'Table(player1: $player1, player2: $player2, status: $status)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'Table(tableNumber: $tableNumber, assignedUsers: $assignedUsers, signedInUsers: $signedInUsers, status: $status)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'Table'))
+      ..add(DiagnosticsProperty('tableNumber', tableNumber))
+      ..add(DiagnosticsProperty('assignedUsers', assignedUsers))
+      ..add(DiagnosticsProperty('signedInUsers', signedInUsers))
+      ..add(DiagnosticsProperty('status', status));
   }
 
   @override
@@ -140,14 +190,23 @@ class _$TableImpl implements _Table {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TableImpl &&
-            (identical(other.player1, player1) || other.player1 == player1) &&
-            (identical(other.player2, player2) || other.player2 == player2) &&
+            (identical(other.tableNumber, tableNumber) ||
+                other.tableNumber == tableNumber) &&
+            const DeepCollectionEquality()
+                .equals(other._assignedUsers, _assignedUsers) &&
+            const DeepCollectionEquality()
+                .equals(other._signedInUsers, _signedInUsers) &&
             (identical(other.status, status) || other.status == status));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, player1, player2, status);
+  int get hashCode => Object.hash(
+      runtimeType,
+      tableNumber,
+      const DeepCollectionEquality().hash(_assignedUsers),
+      const DeepCollectionEquality().hash(_signedInUsers),
+      status);
 
   @JsonKey(ignore: true)
   @override
@@ -163,18 +222,22 @@ class _$TableImpl implements _Table {
   }
 }
 
-abstract class _Table implements Table {
+abstract class _Table extends Table {
   const factory _Table(
-      {final String? player1,
-      final String? player2,
+      {required final int tableNumber,
+      required final Set<AppUser> assignedUsers,
+      required final Set<AppUser> signedInUsers,
       final TableStatus status}) = _$TableImpl;
+  const _Table._() : super._();
 
   factory _Table.fromJson(Map<String, dynamic> json) = _$TableImpl.fromJson;
 
   @override
-  String? get player1;
+  int get tableNumber;
   @override
-  String? get player2;
+  Set<AppUser> get assignedUsers;
+  @override
+  Set<AppUser> get signedInUsers;
   @override
   TableStatus get status;
   @override

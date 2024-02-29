@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pencil_game_admin/features/admin/data/firestore_admin_repository.dart';
 
 import '../../../../constants.dart';
+import '../../../admin/data/firestore_admin_repository.dart';
 import '../../../authorize/data/firebase_auth_instance_provider.dart';
 import '../../domain/experiment.dart';
 import 'experiment_card.dart';
@@ -32,7 +32,7 @@ class _ExperimentsListViewState extends ConsumerState<ExperimentsListView> {
     return StreamBuilder(
         stream: ref
             .read(firestoreAdminRepositoryProvider)
-            .getAdminQuery(firebaseAuth.currentUser!.uid)
+            .getAdminDocRef(firebaseAuth.currentUser!.uid)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

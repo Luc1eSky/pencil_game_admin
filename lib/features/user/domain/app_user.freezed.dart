@@ -25,6 +25,7 @@ mixin _$AppUser {
   String get uid => throw _privateConstructorUsedError;
   String get colorCode => throw _privateConstructorUsedError;
   String get experimentDocId => throw _privateConstructorUsedError;
+  int? get currentTableNumber => throw _privateConstructorUsedError;
   @TimestampConverter()
   DateTime get createdOn => throw _privateConstructorUsedError;
 
@@ -44,6 +45,7 @@ abstract class $AppUserCopyWith<$Res> {
       String uid,
       String colorCode,
       String experimentDocId,
+      int? currentTableNumber,
       @TimestampConverter() DateTime createdOn});
 }
 
@@ -65,6 +67,7 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
     Object? uid = null,
     Object? colorCode = null,
     Object? experimentDocId = null,
+    Object? currentTableNumber = freezed,
     Object? createdOn = null,
   }) {
     return _then(_value.copyWith(
@@ -88,6 +91,10 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
           ? _value.experimentDocId
           : experimentDocId // ignore: cast_nullable_to_non_nullable
               as String,
+      currentTableNumber: freezed == currentTableNumber
+          ? _value.currentTableNumber
+          : currentTableNumber // ignore: cast_nullable_to_non_nullable
+              as int?,
       createdOn: null == createdOn
           ? _value.createdOn
           : createdOn // ignore: cast_nullable_to_non_nullable
@@ -109,6 +116,7 @@ abstract class _$$AppUserImplCopyWith<$Res> implements $AppUserCopyWith<$Res> {
       String uid,
       String colorCode,
       String experimentDocId,
+      int? currentTableNumber,
       @TimestampConverter() DateTime createdOn});
 }
 
@@ -128,6 +136,7 @@ class __$$AppUserImplCopyWithImpl<$Res>
     Object? uid = null,
     Object? colorCode = null,
     Object? experimentDocId = null,
+    Object? currentTableNumber = freezed,
     Object? createdOn = null,
   }) {
     return _then(_$AppUserImpl(
@@ -151,6 +160,10 @@ class __$$AppUserImplCopyWithImpl<$Res>
           ? _value.experimentDocId
           : experimentDocId // ignore: cast_nullable_to_non_nullable
               as String,
+      currentTableNumber: freezed == currentTableNumber
+          ? _value.currentTableNumber
+          : currentTableNumber // ignore: cast_nullable_to_non_nullable
+              as int?,
       createdOn: null == createdOn
           ? _value.createdOn
           : createdOn // ignore: cast_nullable_to_non_nullable
@@ -168,6 +181,7 @@ class _$AppUserImpl extends _AppUser {
       required this.uid,
       required this.colorCode,
       required this.experimentDocId,
+      required this.currentTableNumber,
       @TimestampConverter() required this.createdOn})
       : super._();
 
@@ -185,12 +199,14 @@ class _$AppUserImpl extends _AppUser {
   @override
   final String experimentDocId;
   @override
+  final int? currentTableNumber;
+  @override
   @TimestampConverter()
   final DateTime createdOn;
 
   @override
   String toString() {
-    return 'AppUser(firstName: $firstName, lastName: $lastName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, createdOn: $createdOn)';
+    return 'AppUser(firstName: $firstName, lastName: $lastName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, currentTableNumber: $currentTableNumber, createdOn: $createdOn)';
   }
 
   @override
@@ -207,6 +223,8 @@ class _$AppUserImpl extends _AppUser {
                 other.colorCode == colorCode) &&
             (identical(other.experimentDocId, experimentDocId) ||
                 other.experimentDocId == experimentDocId) &&
+            (identical(other.currentTableNumber, currentTableNumber) ||
+                other.currentTableNumber == currentTableNumber) &&
             (identical(other.createdOn, createdOn) ||
                 other.createdOn == createdOn));
   }
@@ -214,7 +232,7 @@ class _$AppUserImpl extends _AppUser {
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, firstName, lastName, uid,
-      colorCode, experimentDocId, createdOn);
+      colorCode, experimentDocId, currentTableNumber, createdOn);
 
   @JsonKey(ignore: true)
   @override
@@ -237,6 +255,7 @@ abstract class _AppUser extends AppUser {
       required final String uid,
       required final String colorCode,
       required final String experimentDocId,
+      required final int? currentTableNumber,
       @TimestampConverter() required final DateTime createdOn}) = _$AppUserImpl;
   const _AppUser._() : super._();
 
@@ -252,6 +271,8 @@ abstract class _AppUser extends AppUser {
   String get colorCode;
   @override
   String get experimentDocId;
+  @override
+  int? get currentTableNumber;
   @override
   @TimestampConverter()
   DateTime get createdOn;

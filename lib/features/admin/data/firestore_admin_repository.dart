@@ -6,8 +6,8 @@ import 'package:pencil_game_admin/firestore/firestore_instance_provider.dart';
 import '../../../constants.dart';
 
 class FirestoreAdminRepository {
-  FirestoreAdminRepository({required this.firestore});
-  final FirebaseFirestore firestore;
+  FirestoreAdminRepository(this._firestore);
+  final FirebaseFirestore _firestore;
 
   /// Creates a new admin document after signup
   Future<void> createAdmin({
@@ -15,7 +15,7 @@ class FirestoreAdminRepository {
     required String firstName,
     required String lastName,
   }) async {
-    CollectionReference adminCollectionRef = firestore.collection(adminsCollectionName);
+    CollectionReference adminCollectionRef = _firestore.collection(adminsCollectionName);
 
     debugPrint('Searching for admin document.');
     final adminDoc = await adminCollectionRef.doc(adminUid).get();
@@ -35,35 +35,38 @@ class FirestoreAdminRepository {
         'createdOn': Timestamp.now(),
       },
     );
-
-    // // final querySnap =
-    // //     await adminCollectionRef.where('adminUid', isEqualTo: adminUid).limit(1).get();
-    //
-    // //if (querySnap.docs.isEmpty) {
-    // debugPrint('Creating new admin document.');
-    // await adminCollectionRef.add(
-    //   {
-    //     'firstName': firstName,
-    //     'lastName': lastName,
-    //     'experiments': [],
-    //     'adminUid': adminUid,
-    //     'createdOn': Timestamp.now(),
-    //   },
-    // );
-    // } else {
-    //   debugPrint('Document for admin $firstName $lastName already exists.');
-    // }
   }
 
   /// get query to user's admin document to keep track of
   /// the experiments that this user has access to
-  //Query<Map<String, dynamic>>
-  DocumentReference<Map<String, dynamic>> getAdminQuery(String uid) {
-    return firestore.collection(adminsCollectionName).doc(uid);
-    //return firestore.collection(adminsCollectionName).where('adminUid', isEqualTo: uid).limit(1);
+  DocumentReference<Map<String, dynamic>> getAdminDocRef(String uid) {
+    return _firestore.collection(adminsCollectionName).doc(uid);
+  }
+
+  /// add a reference to an existing experiment to an admin
+  /// this controls which experiments the admin has access to
+  Future<void> addExperimentToAdmin({
+    required experimentDocId,
+    required adminUid,
+  }) async {
+    // find admin doc of current user via admin UID
+    final adminDocSnap = await _firestore.collection(adminsCollectionName).doc(adminUid).get();
+
+    //TODO: HANDLE ERROR?!
+    // exit if there no matching admin document was found
+    if (!adminDocSnap.exists && adminDocSnap.data() != null) {
+      debugPrint('Error - Could not find admin document for uid: $adminUid.');
+      return;
+    }
+
+    // add experiment doc reference to array in admin doc
+    // this is needed to identify who has access to which experiment
+    await adminDocSnap.reference.update({
+      'experiments': FieldValue.arrayUnion([experimentDocId]),
+    });
   }
 }
 
 final firestoreAdminRepositoryProvider = Provider<FirestoreAdminRepository>((ref) {
-  return FirestoreAdminRepository(firestore: ref.watch(firestoreInstanceProvider));
+  return FirestoreAdminRepository(ref.watch(firestoreInstanceProvider));
 });

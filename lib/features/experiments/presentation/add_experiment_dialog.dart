@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pencil_game_admin/features/experiments/application/experiment_service.dart';
+import 'package:pencil_game_admin/style/color_palette.dart';
 
 import '../../authorize/data/firebase_auth_instance_provider.dart';
-import '../data/firestore_experiment_repository.dart';
 
 final _formKey = GlobalKey<FormState>();
 
@@ -95,16 +96,24 @@ class _AddExperimentDialogState extends State<AddExperimentDialog> {
                         });
                         final experimentName = nameController.text;
                         final experimentLocation = locationController.text;
-
-                        // add experiment to firestore
-                        await ref.read(firestoreExperimentRepositoryProvider).addExperiment(
-                              experimentName: experimentName,
-                              experimentLocation: experimentLocation,
-                              adminUid: ref
-                                  .watch(firebaseAuthInstanceProvider)
-                                  .currentUser!
-                                  .uid, //ref.watch(firebaseAuthRepositoryProvider).uid!,
+                        try {
+                          await ref.read(experimentServiceProvider).addNewExperiment(
+                                experimentName: experimentName,
+                                experimentLocation: experimentLocation,
+                                adminUid: ref.read(firebaseAuthInstanceProvider).currentUser!.uid,
+                              );
+                        } catch (error) {
+                          debugPrint(error.toString());
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: ColorPalette().snackBarError,
+                                content: const Text(
+                                    'An error occurred while trying to create a new experiment.'),
+                              ),
                             );
+                          }
+                        }
 
                         if (context.mounted) {
                           Navigator.of(context).pop();

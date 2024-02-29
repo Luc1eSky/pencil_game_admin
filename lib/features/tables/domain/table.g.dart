@@ -7,22 +7,29 @@ part of 'table.dart';
 // **************************************************************************
 
 _$TableImpl _$$TableImplFromJson(Map<String, dynamic> json) => _$TableImpl(
-      player1: json['player1'] as String?,
-      player2: json['player2'] as String?,
+      tableNumber: json['tableNumber'] as int,
+      assignedUsers: (json['assignedUsers'] as List<dynamic>)
+          .map((e) => AppUser.fromJson(e as Map<String, dynamic>))
+          .toSet(),
+      signedInUsers: (json['signedInUsers'] as List<dynamic>)
+          .map((e) => AppUser.fromJson(e as Map<String, dynamic>))
+          .toSet(),
       status: $enumDecodeNullable(_$TableStatusEnumMap, json['status']) ??
-          TableStatus.empty,
+          TableStatus.waiting,
     );
 
 Map<String, dynamic> _$$TableImplToJson(_$TableImpl instance) =>
     <String, dynamic>{
-      'player1': instance.player1,
-      'player2': instance.player2,
+      'tableNumber': instance.tableNumber,
+      'assignedUsers': instance.assignedUsers.map((e) => e.toJson()).toList(),
+      'signedInUsers': instance.signedInUsers.map((e) => e.toJson()).toList(),
       'status': _$TableStatusEnumMap[instance.status]!,
     };
 
 const _$TableStatusEnumMap = {
-  TableStatus.empty: 'empty',
   TableStatus.waiting: 'waiting',
   TableStatus.ready: 'ready',
   TableStatus.playing: 'playing',
+  TableStatus.finished: 'finished',
+  TableStatus.aborted: 'aborted',
 };

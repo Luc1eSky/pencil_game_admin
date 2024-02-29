@@ -14,8 +14,11 @@ const adminShareCodeCollectionName = 'adminShareCodes';
 const userShareCodeCollectionName = 'userShareCodes';
 const tableCollectionName = 'tables';
 const userCollectionName = 'users';
-const scheduleCollectionName = 'schedule';
+const settingsCollectionName = 'settings';
 const scheduleDocName = 'schedule';
+const detailedScheduleDocName = 'detailedSchedule';
+const parameterDocName = 'parameters';
+const progressDocName = 'progress';
 
 const adminUidFieldName = 'adminUid';
 const sharedAdminListName = 'sharedWithAdminUids';

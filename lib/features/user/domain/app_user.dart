@@ -15,6 +15,7 @@ class AppUser with _$AppUser {
     required String uid,
     required String colorCode,
     required String experimentDocId,
+    required int? currentTableNumber,
     @TimestampConverter() required DateTime createdOn,
   }) = _AppUser;
 

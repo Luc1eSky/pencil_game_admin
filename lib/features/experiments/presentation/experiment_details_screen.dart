@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pencil_game_admin/constants.dart';
 import 'package:pencil_game_admin/features/experiments/presentation/widgets/app_bar.dart';
 import 'package:pencil_game_admin/features/schedule/presentation/schedule_screen.dart';
+import 'package:pencil_game_admin/features/tables/presentation/tables_screen.dart';
 
 import '../../../style/color_palette.dart';
 import '../../user/presentation/add_user_screen.dart';
@@ -60,7 +61,7 @@ class _ExperimentDetailsScreenState extends State<ExperimentDetailsScreen> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: cardMaxWidth),
           child: [
-            Container(color: Colors.yellow),
+            TablesScreen(docId: widget.docId),
             ScheduleScreen(experimentDocId: widget.docId),
             UserListView(experimentDocId: widget.docId),
             Container(),
