@@ -209,31 +209,6 @@ class _$AppUserImpl extends _AppUser {
     return 'AppUser(firstName: $firstName, lastName: $lastName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, currentTableNumber: $currentTableNumber, createdOn: $createdOn)';
   }
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$AppUserImpl &&
-            (identical(other.firstName, firstName) ||
-                other.firstName == firstName) &&
-            (identical(other.lastName, lastName) ||
-                other.lastName == lastName) &&
-            (identical(other.uid, uid) || other.uid == uid) &&
-            (identical(other.colorCode, colorCode) ||
-                other.colorCode == colorCode) &&
-            (identical(other.experimentDocId, experimentDocId) ||
-                other.experimentDocId == experimentDocId) &&
-            (identical(other.currentTableNumber, currentTableNumber) ||
-                other.currentTableNumber == currentTableNumber) &&
-            (identical(other.createdOn, createdOn) ||
-                other.createdOn == createdOn));
-  }
-
-  @JsonKey(ignore: true)
-  @override
-  int get hashCode => Object.hash(runtimeType, firstName, lastName, uid,
-      colorCode, experimentDocId, currentTableNumber, createdOn);
-
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')

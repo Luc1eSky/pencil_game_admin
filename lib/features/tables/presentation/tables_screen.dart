@@ -1,9 +1,11 @@
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pencil_game_admin/features/progress/data/firestore_progress_repository.dart';
-import 'package:pencil_game_admin/features/progress/domain/experiment_progress.dart';
-import 'package:pencil_game_admin/features/tables/data/firestore_table_repository.dart';
+
+import '../../progress/data/firestore_progress_repository.dart';
+import '../../progress/domain/experiment_progress.dart';
+import '../../user/domain/app_user.dart';
+import '../data/firestore_table_repository.dart';
 
 class TablesScreen extends ConsumerWidget {
   const TablesScreen({
@@ -56,6 +58,7 @@ class TablesScreen extends ConsumerWidget {
                 final assignedUsers = table.assignedUsers;
                 final firstUser = assignedUsers.first;
                 final secondUser = assignedUsers.last;
+                final tableDocRef = docSnap.reference;
 
                 return Card(
                   child: ListTile(
@@ -67,54 +70,54 @@ class TablesScreen extends ConsumerWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    // title: Text(
-                    //   '${firstUser.colorCode} vs. ${secondUser.colorCode} ',
-                    //   style: const TextStyle(fontSize: 18),
-                    // ),
-                    subtitle: Row(
+                    subtitle: Column(
                       children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                firstUser.colorCode,
-                                style: const TextStyle(fontSize: 25),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: TablePlayerWidget(
+                                user: firstUser,
+                                userIsPresent: table.firstUserIsPresent,
                               ),
-                              Text(
-                                '${firstUser.firstName} ${firstUser.lastName}',
-                                style: const TextStyle(fontSize: 15),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Container(),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: TablePlayerWidget(
+                                user: secondUser,
+                                userIsPresent: table.secondUserIsPresent,
                               ),
-                              Text(
-                                'ready: ${table.firstUserIsPresent}',
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                secondUser.colorCode,
-                                style: const TextStyle(fontSize: 25),
-                              ),
-                              Text(
-                                '${secondUser.firstName} ${secondUser.lastName}',
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                              Text(
-                                'ready: ${table.secondUserIsPresent}',
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                            ],
+                        if (table.firstUserIsPresent || table.secondUserIsPresent)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 20.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    await ref
+                                        .read(firestoreTableRepositoryProvider)
+                                        .removePlayersFromTable(tableDocRef);
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                if (table.hasCorrectUsers)
+                                  ElevatedButton(
+                                    onPressed: () {},
+                                    child: const Text('Start'),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
-                    // trailing: Text(
-                    //   DateFormat('MM-dd-yyyy\nhh:mm a').format(user.createdOn),
-                    //   style: const TextStyle(fontSize: 14),
-                    // ),
                   ),
                 );
               },
@@ -123,6 +126,49 @@ class TablesScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class TablePlayerWidget extends StatelessWidget {
+  const TablePlayerWidget({
+    super.key,
+    required this.user,
+    required this.userIsPresent,
+  });
+
+  final AppUser user;
+  final bool userIsPresent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: userIsPresent ? Colors.green : Colors.grey,
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            FittedBox(
+              child: Text(
+                user.colorCode,
+                style: const TextStyle(
+                  fontSize: 24,
+                  //fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            FittedBox(
+              child: Text(
+                user.shortNameString,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

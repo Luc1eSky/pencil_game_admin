@@ -53,6 +53,9 @@ class LockScheduleSwitch extends ConsumerWidget {
                             experimentDocId: experimentDocId,
                             newStatus: ExperimentStatus.scheduled,
                           );
+
+                      // reset current table number of all users (set to null)
+                      ref.read(firestoreUserRepositoryProvider).resetTableNumber(experimentDocId);
                     }
                     // if currently scheduled, change status to "lockedSchedule"
                     else if (progress.status == ExperimentStatus.scheduled) {

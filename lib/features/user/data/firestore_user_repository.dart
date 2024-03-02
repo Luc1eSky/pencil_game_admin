@@ -12,6 +12,15 @@ class FirestoreUserRepository {
   FirestoreUserRepository(this._firestore);
   final FirebaseFirestore _firestore;
 
+  /// helper function to get a reference to
+  /// the users collection of a certain experiment
+  CollectionReference<Map<String, dynamic>> _getUserCollectionRef(String experimentDocId) {
+    return _firestore
+        .collection(experimentCollectionName)
+        .doc(experimentDocId)
+        .collection(userCollectionName);
+  }
+
   /// returns stream to a document with a specific share code
   Stream<QuerySnapshot<Map<String, dynamic>>> getUserShareCodeStream(String code) {
     return _firestore
@@ -23,12 +32,7 @@ class FirestoreUserRepository {
 
   /// returns query of all users of a specific experiment
   Query<AppUser> getUsersQuery(String experimentDocId) {
-    return _firestore
-        .collection(experimentCollectionName)
-        .doc(experimentDocId)
-        .collection(userCollectionName)
-        .orderBy('createdOn')
-        .withConverter(
+    return _getUserCollectionRef(experimentDocId).orderBy('createdOn').withConverter(
           fromFirestore: (snapshot, _) => AppUser.fromFirestore(snapshot.data()!, snapshot.id),
           toFirestore: (user, _) => user.toFirestore(),
         );
@@ -123,31 +127,46 @@ class FirestoreUserRepository {
     }
   }
 
+  /// changes the table number variable for all users based on the current round
+  /// this shows the user where to go
   void changeCurrentTableNumbers(String experimentDocId, DetailedRound round) {
     for (var game in round.games) {
+      // get list of uids of playing users and table number
       final listOfUserUids = game.userPair.map((u) => u.uid).toList();
       final tableNumber = game.tableNumber;
 
       // update User documents with table numbers
       for (var uid in listOfUserUids) {
-        _firestore
-            .collection(experimentCollectionName)
-            .doc(experimentDocId)
-            .collection(userCollectionName)
-            .doc(uid)
-            .update({'currentTableNumber': tableNumber});
+        _getUserCollectionRef(experimentDocId).doc(uid).update(
+          {'currentTableNumber': tableNumber},
+        );
+      }
+
+      // get list of uids of pausing players
+      final listOfPausingUids = round.pausingUsers.map((u) => u.uid).toList();
+
+      // update User documents with 0 for pausing players
+      for (var uid in listOfPausingUids) {
+        _getUserCollectionRef(experimentDocId).doc(uid).update(
+          {'currentTableNumber': 0},
+        );
       }
     }
+  }
 
-    final listOfPausingUids = round.pausingUsers.map((u) => u.uid).toList();
-    // update User documents with 0 for pausing players
-    for (var uid in listOfPausingUids) {
-      _firestore
-          .collection(experimentCollectionName)
-          .doc(experimentDocId)
-          .collection(userCollectionName)
-          .doc(uid)
-          .update({'currentTableNumber': 0});
+  /// resets the table number for all users to null
+  void resetTableNumber(String experimentDocId) async {
+    // get user query of all users in experiment
+    final userQuerySnap = await getUsersQuery(experimentDocId).get();
+
+    // go through all doc snaps of query
+    for (var docSnap in userQuerySnap.docs) {
+      // create user from document data
+      final user = docSnap.data();
+      // create updated user with table number null
+      final updatedUser = user.copyWith(currentTableNumber: null);
+      // update data in firestore
+      _getUserCollectionRef(experimentDocId).doc(updatedUser.uid).update(updatedUser.toFirestore());
     }
   }
 }

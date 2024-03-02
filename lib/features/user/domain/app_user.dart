@@ -31,4 +31,17 @@ class AppUser with _$AppUser {
     jsonMap.remove('uid');
     return jsonMap;
   }
+
+  String get shortNameString => '$firstName ${lastName.substring(0, 1)}.';
+  String get fullNameString => '$firstName $lastName';
+
+  // only consider uid for equality
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is AppUser && runtimeType == other.runtimeType && uid == other.uid;
+  }
+
+  @override
+  int get hashCode => uid.hashCode;
 }
