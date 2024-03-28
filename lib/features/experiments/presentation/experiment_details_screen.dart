@@ -61,7 +61,7 @@ class _ExperimentDetailsScreenState extends State<ExperimentDetailsScreen> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: cardMaxWidth),
           child: [
-            TablesScreen(docId: widget.docId),
+            TablesScreen(experimentDocId: widget.docId),
             ScheduleScreen(experimentDocId: widget.docId),
             UserListView(experimentDocId: widget.docId),
             Container(),

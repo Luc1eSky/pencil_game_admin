@@ -3,16 +3,15 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pencil_game_admin/features/schedule/domain/detailed_schedule.dart';
-import 'package:pencil_game_admin/features/schedule/domain/schedule_parameters.dart';
 import 'package:pencil_game_admin/firestore/firestore_instance_provider.dart';
 
 import '../../../constants.dart';
-import '../../user/domain/app_user.dart';
-import '../domain/detailed_game.dart';
-import '../domain/detailed_round.dart';
+import '../../user/domain/simple_user.dart';
+import '../domain/game.dart';
 import '../domain/participant_pair.dart';
+import '../domain/round.dart';
 import '../domain/schedule.dart';
+import '../domain/schedule_parameters.dart';
 
 class FirestoreScheduleRepository {
   FirestoreScheduleRepository(this._firestore);
@@ -41,81 +40,70 @@ class FirestoreScheduleRepository {
 
   /// add new detailed schedule document
   Future<void> addScheduleDocs(String experimentDocId) async {
-    // create new empty schedules
+    // create new empty schedule
     const newSchedule = Schedule(rounds: []);
-    const newDetailedSchedule = DetailedSchedule(rounds: []);
-
-    // add a new document for the schedule in sub-collection
-    await _firestore
-        .collection(experimentCollectionName)
-        .doc(experimentDocId)
-        .collection(settingsCollectionName)
-        .doc(scheduleDocName)
-        .set(newSchedule.toJson());
 
     // add a new document for the detailed schedule in sub-collection
     await _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
         .collection(settingsCollectionName)
-        .doc(detailedScheduleDocName)
-        .set(newDetailedSchedule.toJson());
+        .doc(scheduleDocName)
+        .set(newSchedule.toJson());
   }
 
   /// get stream to the parameters of a specific experiment
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getParameterStream(String experimentDocId) {
+  Stream<DocumentSnapshot<ScheduleParameters>> getParameterStream(String experimentDocId) {
     return _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
         .collection(settingsCollectionName)
         .doc(parameterDocName)
+        .withConverter(
+          fromFirestore: (snapshot, _) => ScheduleParameters.fromJson(snapshot.data()!),
+          toFirestore: (parameters, _) => parameters.toJson(),
+        )
         .snapshots();
   }
 
   /// get stream to a schedule of a specific experiment
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getDetailedScheduleStream(String experimentDocId) {
-    return _firestore
-        .collection(experimentCollectionName)
-        .doc(experimentDocId)
-        .collection(settingsCollectionName)
-        .doc(detailedScheduleDocName)
-        .snapshots();
-  }
-
-  /// get stream to a schedule of a specific experiment
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getScheduleStream(String experimentDocId) {
+  Stream<DocumentSnapshot<Schedule>> getScheduleStream(String experimentDocId) {
     return _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
         .collection(settingsCollectionName)
         .doc(scheduleDocName)
+        .withConverter(
+          fromFirestore: (snapshot, _) => Schedule.fromJson(snapshot.data()!),
+          toFirestore: (schedule, _) => schedule.toJson(),
+        )
         .snapshots();
   }
 
   /// get a detailed round from schedule
-  Future<DetailedRound> getDetailedRound(
+  Future<Round> getRound(
     String experimentDocId,
     int roundNumber,
   ) async {
-    final detailedScheduleDocSnap = await _firestore
+    final scheduleDocSnap = await _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
         .collection(settingsCollectionName)
-        .doc(detailedScheduleDocName)
+        .doc(scheduleDocName)
         .get();
 
-    if (!detailedScheduleDocSnap.exists) {
+    if (!scheduleDocSnap.exists) {
       throw 'Error - Detailed schedule doc does not exist!';
     }
-    final scheduleData = detailedScheduleDocSnap.data();
+    final scheduleData = scheduleDocSnap.data();
     if (scheduleData == null) {
       throw 'Error - Detailed schedule doc does not exist!';
     }
 
-    final detailedSchedule = DetailedSchedule.fromJson(scheduleData);
+    final schedule = Schedule.fromJson(scheduleData);
 
     final detailedRound =
-        detailedSchedule.rounds.firstWhere((round) => round.roundNumber == roundNumber, orElse: () {
+        schedule.rounds.firstWhere((round) => round.roundNumber == roundNumber, orElse: () {
       throw 'Error - No round $roundNumber found.';
     });
 
@@ -156,6 +144,7 @@ class FirestoreScheduleRepository {
           // update document in firestore
           transaction.update(parameterDocRef, updatedParameters.toJson());
         } catch (e) {
+          // TODO: HANDLE ERROR
           debugPrint(e.toString());
           return;
         }
@@ -164,25 +153,22 @@ class FirestoreScheduleRepository {
   }
 
   /// calculate schedule
-  Future<void> updateSchedules({
+  Future<void> updateSchedule({
     required String experimentDocId,
-    required DetailedSchedule schedule,
+    required Schedule schedule,
   }) async {
-    // get schedule collection reference of specific experiment
-    final scheduleCollectionRef = _firestore
+    // get settings collection reference of specific experiment
+    final settingsCollectionRef = _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
         .collection(settingsCollectionName);
 
-    await scheduleCollectionRef.doc(detailedScheduleDocName).update(schedule.toJson());
-
-    // convert to simple schedule
-    final colorSchedule = Schedule.fromDetailed(schedule);
-    await scheduleCollectionRef.doc(scheduleDocName).update(colorSchedule.toJson());
+    // update schedule document in settings collection
+    await settingsCollectionRef.doc(scheduleDocName).update(schedule.toJson());
   }
 
   /// calculate schedule
-  Future<DetailedSchedule?> calculateSchedule({
+  Future<Schedule?> calculateSchedule({
     required String experimentDocId,
   }) async {
     // reference to parameters of current experiment
@@ -327,12 +313,12 @@ class FirestoreScheduleRepository {
       // (results were found without exceeding max retries)
       if (tryCount <= maxTriesFromStart) {
         // convert result map into list of rounds
-        List<DetailedRound> rounds = [];
+        List<Round> rounds = [];
         // Map<int, Map<int, Set<int>>>
         resultMap.forEach((roundNumber, tableMap) {
           //print('roundNumber: $roundNumber');
-          List<DetailedGame> listOfGames = [];
-          Set<AppUser> setOfPausingUsers = {};
+          List<Game> listOfGames = [];
+          Set<SimpleUser> setOfPausingUsers = {};
           tableMap.forEach((tableNumber, playerNumbers) {
             // convert player numbers to app users
             final users = playerNumbers.map((n) => allActiveUsers.elementAt(n)).toSet();
@@ -343,16 +329,16 @@ class FirestoreScheduleRepository {
             // add playing users
             else {
               listOfGames.add(
-                DetailedGame(
+                Game(
                   tableNumber: tableNumber,
-                  userPair: users,
+                  assignedUsers: users,
                 ),
               );
             }
           });
           // add round to list of rounds
           rounds.add(
-            DetailedRound(
+            Round(
               roundNumber: roundNumber,
               games: listOfGames,
               pausingUsers: setOfPausingUsers,
@@ -372,7 +358,7 @@ class FirestoreScheduleRepository {
         transaction.update(parameterDocRef, updatedParameters.toJson());
 
         // create updated parameters object
-        final newSchedule = DetailedSchedule(rounds: rounds);
+        final newSchedule = Schedule(rounds: rounds);
 
         debugPrint(
             '\nCOMPLETED SUCCESSFULLY AFTER $tryCount RUNS AND $maxRoundRetriesOfLastRun MAX ROUND RETRIES');
@@ -383,204 +369,6 @@ class FirestoreScheduleRepository {
         return null;
       }
     });
-
-    //     // reference to schedule of current experiment
-    //     final scheduleRef = _firestore
-    //         .collection(experimentCollectionName)
-    //         .doc(experimentDocId)
-    //         .collection(scheduleCollectionName)
-    //         .doc(scheduleDocName);
-    //
-    //     return _firestore.runTransaction((transaction) async {
-    //       // get experiment document
-    //       final scheduleDoc = await transaction.get(scheduleRef);
-    //
-    //       // exit if it does not exist
-    //       if (!scheduleDoc.exists) {
-    //         throw Exception('Schedule document for experiment $experimentDocId does not exist.');
-    //       }
-    //       // exit if there is no data
-    //       if (scheduleDoc.data() == null) {
-    //         throw Exception('Schedule document for experiment $experimentDocId has no data.');
-    //       }
-    //
-    //       // get current schedule
-    //       final currentSchedule = Schedule.fromJson(scheduleDoc.data()!);
-    //
-    //       // get user count and inputs for table count and number of rounds
-    //       final userCount = currentSchedule.userCount;
-    //       final maxTables = currentSchedule.tableCount;
-    //       final maxRounds = currentSchedule.numberOfRounds;
-    //
-    //       // get list of color codes of active players
-    //       final playerColorCodes = currentSchedule.playerColorCodes;
-    //
-    //       // exit if any of the input values is 0 or negative
-    //       if (userCount <= 0 || maxTables <= 0 || maxRounds <= 0) {
-    //         debugPrint('Error - Cannot calculate schedule with a 0 or negative value.');
-    //         return false;
-    //       }
-    //       // set of integers {0,1,2,3,4,...}
-    //       final allUsers = List.generate(userCount, (index) => index).toSet();
-    //
-    //       // calculate all possible pairs
-    //       Set<ParticipantPair> allPossiblePairs = {};
-    //
-    //       // go through copy of user list
-    //       final allUsersCopy = [...allUsers];
-    //       for (int i = 0; i < userCount; i++) {
-    //         // get first entry in list and remove
-    //         final currentUser = allUsersCopy.removeAt(0);
-    //         // create all possible user pairs
-    //         for (var otherUser in allUsersCopy) {
-    //           final pair = ParticipantPair(currentUser, otherUser);
-    //           allPossiblePairs.add(pair);
-    //         }
-    //       }
-    //
-    //       // Map that saves result in integers
-    //       // Map<roundNumber, Map<tableNumber, Set<playerNumbers>>>
-    //       Map<int, Map<int, Set<int>>> resultMap = {};
-    //
-    //       // calculate max combinations, table count and number of rounds
-    //       final possibleCombinationCount = allPossiblePairs.length;
-    //       final tableCount = min(maxTables, userCount ~/ 2);
-    //       final rounds = min(maxRounds, possibleCombinationCount ~/ tableCount);
-    //
-    //       int maxRoundRetriesOfLastRun = 0;
-    //       int tryCount = 1;
-    //       bool retryFromStart = true;
-    //       while (retryFromStart == true && tryCount <= maxTriesFromStart) {
-    //         final random = Random();
-    //         // reset max round retries
-    //         maxRoundRetriesOfLastRun = 0;
-    //         // keeps track which pairs played over whole experiment (multiple rounds)
-    //         Set<ParticipantPair> pairsAlreadyPlayed = {};
-    //         // go through all rounds
-    //         for (int r = 1; r <= rounds; r++) {
-    //           int roundTryCount = 1;
-    //           bool retryRound = true;
-    //           while (retryRound == true && roundTryCount <= maxRoundTries) {
-    //             // by default, do not retry
-    //             retryFromStart = false;
-    //             retryRound = false;
-    //             resultMap[r] = {};
-    //             // all pairs minus the once that had already played in previous rounds
-    //             Set<ParticipantPair> possiblePairs = allPossiblePairs.difference(pairsAlreadyPlayed);
-    //             // update pairsAlreadyPlayed after round was a success with the pairs of that round
-    //             Set<ParticipantPair> pairsThisRound = {};
-    //             // keep track, so no user plays twice in the same round
-    //             Set<int> usersPlayingThisRound = {};
-    //             // keep track of who has to pause
-    //             Set<int> usersPausingThisRound = {};
-    //             // go through all available tables
-    //             for (int t = 1; t <= tableCount; t++) {
-    //               // remove all pairs of players who already played this round from possible pair list
-    //               for (int user in usersPlayingThisRound) {
-    //                 possiblePairs =
-    //                     possiblePairs.where((pair) => !pair.participantIsInPair(user)).toSet();
-    //               }
-    //
-    //               // check if there are still options available
-    //               if (possiblePairs.isEmpty) {
-    //                 maxRoundRetriesOfLastRun = max(maxRoundRetriesOfLastRun, roundTryCount);
-    //                 roundTryCount++;
-    //                 retryRound = true;
-    //                 retryFromStart = true;
-    //                 break;
-    //               }
-    //
-    //               // randomly select a pair from the set of possible pairs
-    //               final randomNumber = random.nextInt(possiblePairs.length);
-    //               final randomPair = possiblePairs.elementAt(randomNumber);
-    //
-    //               resultMap[r]![t] = randomPair.toSet();
-    //               // add to pairsThisRound
-    //               pairsThisRound.add(randomPair);
-    //               // add to usersPlayingThisRound
-    //               usersPlayingThisRound.addAll([
-    //                 randomPair.participant1,
-    //                 randomPair.participant2,
-    //               ]);
-    //             }
-    //
-    //             // if no retry is needed, calculate users that are pausing
-    //             // and update the pairs that have already played with the ones that played this round
-    //             if (retryRound == false) {
-    //               usersPausingThisRound = allUsers.difference(usersPlayingThisRound);
-    //               resultMap[r]![0] = usersPausingThisRound;
-    //
-    //               // add all pairs from this round to set of already played pairs
-    //               pairsAlreadyPlayed.addAll(pairsThisRound);
-    //             }
-    //           }
-    //           if (retryFromStart == true) {
-    //             tryCount++;
-    //             break;
-    //           }
-    //         }
-    //       }
-    //
-    //       // check if calculation was successful
-    //       // (results were found without exceeding max retries)
-    //       if (tryCount <= maxTriesFromStart) {
-    //         // convert into list of rounds
-    //         List<Round> rounds = [];
-    //         // Map<int, Map<int, Set<int>>>
-    //         resultMap.forEach((roundNumber, tableMap) {
-    //           //print('roundNumber: $roundNumber');
-    //           List<Game> listOfGames = [];
-    //           Set<String> setOfPausingPlayers = {};
-    //           tableMap.forEach((tableNumber, playerNumbers) {
-    //             //print('tableNumber: $tableNumber: playerNumbers: $playerNumbers');
-    //             // convert player numbers to color codes
-    //             final playerColors = playerNumbers.map((n) => playerColorCodes[n]).toSet();
-    //
-    //             // add pausing player color codes
-    //             if (tableNumber == 0) {
-    //               setOfPausingPlayers.addAll(playerColors);
-    //             }
-    //             // add playing player color codes
-    //             else {
-    //               listOfGames.add(
-    //                 Game(
-    //                   tableNumber: tableNumber,
-    //                   playerPair: playerColors,
-    //                 ),
-    //               );
-    //             }
-    //           });
-    //           // add round to list of rounds
-    //           rounds.add(
-    //             Round(
-    //               roundNumber: roundNumber,
-    //               games: listOfGames,
-    //               pausingPlayers: setOfPausingPlayers,
-    //             ),
-    //           );
-    //         });
-    //
-    //         // create updated schedule
-    //         final updatedSchedule = currentSchedule.copyWith(rounds: rounds);
-    //
-    //         // update schedule doc with new user count and color color code list
-    //         transaction.update(scheduleRef, updatedSchedule.toJson());
-    //
-    //         debugPrint(
-    //             '\nCOMPLETED SUCCESSFULLY AFTER $tryCount RUNS AND $maxRoundRetriesOfLastRun MAX ROUND RETRIES');
-    //         return true;
-    //       } else {
-    //         debugPrint(
-    //             '\nFAILED AFTER ${tryCount - 1} RUNS AND $maxRoundRetriesOfLastRun MAX ROUND RETRIES');
-    //         return false;
-    //       }
-    //     });
-    //   } catch (error) {
-    //     print('ERROR!!!');
-    //     debugPrint(error.toString());
-    //     return false;
-    //   }
-    // }
   }
 }
 

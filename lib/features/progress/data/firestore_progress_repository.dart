@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_admin/firestore/firestore_instance_provider.dart';
 
@@ -19,8 +20,15 @@ class FirestoreProgressRepository {
   }
 
   /// stream progress document for a specific experiment
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getProgressDocStream(String experimentDocId) {
-    return _getProgressDocRef(experimentDocId).snapshots();
+  Stream<DocumentSnapshot<ExperimentProgress>> getProgressDocStream(String experimentDocId) {
+    return _getProgressDocRef(experimentDocId)
+        .withConverter(
+          fromFirestore: (snapshot, _) {
+            return ExperimentProgress.fromJson(snapshot.data()!);
+          },
+          toFirestore: (progress, _) => progress.toJson(),
+        )
+        .snapshots();
   }
 
   /// Creates a new progress document for a specific experiment
@@ -45,8 +53,56 @@ class FirestoreProgressRepository {
 
     // update doc with new status
     docRef.update({'status': newStatus.name});
+  }
 
-    print(newStatus.name);
+  /// get current round number
+  Future<int> getCurrentRoundNumber({required String experimentDocId}) async {
+    try {
+      // get doc ref of progress doc of specific experiment
+      final docSnap = await _getProgressDocRef(experimentDocId).get();
+      final currentProgress = ExperimentProgress.fromJson(docSnap.data()!);
+      // return current round number
+      return currentProgress.currentRoundNumber;
+    } catch (e) {
+      throw Exception("Error. Could not get current round number.\n$e");
+    }
+  }
+
+  /// start a round if current status allows to do so
+  Future<void> startRound({
+    required String experimentDocId,
+    required ExperimentStatus currentStatus,
+  }) async {
+    // do nothing if current status is not "lockedSchedule" or "roundWaiting"
+    if (currentStatus != ExperimentStatus.lockedSchedule &&
+        currentStatus != ExperimentStatus.roundWaiting) {
+      debugPrint('Round already started.');
+      return;
+    }
+
+    // get doc ref of progress doc of specific experiment
+    final docRef = _getProgressDocRef(experimentDocId);
+
+    // if it looks like it can be started run a transaction
+    // to avoid race condition (multiple starts)
+    await _firestore.runTransaction((transaction) async {
+      try {
+        final docSnap = await transaction.get(docRef);
+        final dbCurrentProgress = ExperimentProgress.fromJson(docSnap.data()!);
+        final dbCurrentStatus = dbCurrentProgress.status;
+        if (dbCurrentStatus != ExperimentStatus.lockedSchedule &&
+            dbCurrentStatus != ExperimentStatus.roundWaiting) {
+          debugPrint('Cannot start round. Wrong state.');
+          return;
+        }
+        // update progress status to "roundPlaying"
+        final updatedProgress = dbCurrentProgress.copyWith(status: ExperimentStatus.roundPlaying);
+        transaction.update(docRef, updatedProgress.toJson());
+      } catch (e) {
+        debugPrint(e.toString());
+        return;
+      }
+    });
   }
 }
 

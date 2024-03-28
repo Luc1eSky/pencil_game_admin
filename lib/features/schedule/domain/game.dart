@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../user/domain/simple_user.dart';
+
 part 'game.freezed.dart';
 part 'game.g.dart';
 
@@ -7,7 +9,7 @@ part 'game.g.dart';
 class Game with _$Game {
   const factory Game({
     required int tableNumber,
-    required Set<String> playerPair, // pair of color codes
+    required Set<SimpleUser> assignedUsers,
   }) = _Game;
 
   factory Game.fromJson(Map<String, dynamic> json) => _$GameFromJson(json);

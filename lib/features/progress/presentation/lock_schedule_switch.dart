@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pencil_game_admin/features/progress/data/firestore_progress_repository.dart';
-import 'package:pencil_game_admin/features/progress/domain/experiment_progress.dart';
-import 'package:pencil_game_admin/features/schedule/data/firestore_schedule_repository.dart';
-import 'package:pencil_game_admin/features/tables/data/firestore_table_repository.dart';
-import 'package:pencil_game_admin/features/user/data/firestore_user_repository.dart';
+import 'package:pencil_game_admin/features/tables/data/realtime_database_repository.dart';
+
+import '../../schedule/data/firestore_schedule_repository.dart';
+import '../../user/data/firestore_user_repository.dart';
+import '../data/firestore_progress_repository.dart';
+import '../domain/experiment_progress.dart';
 
 class LockScheduleSwitch extends ConsumerWidget {
   LockScheduleSwitch({super.key, required this.experimentDocId});
@@ -31,17 +32,21 @@ class LockScheduleSwitch extends ConsumerWidget {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final docData = snapshot.data?.data();
-          if (docData == null) {
-            debugPrint('Document has no data!');
-            return const Text('Error - document has no data.');
+          ExperimentProgress progress;
+          try {
+            progress = snapshot.data!.data()!;
+          } catch (e) {
+            return const Text('Progress object conversion error.');
           }
+          // final progress = snapshot.data?.data();
+          // if (progress == null) {
+          //   debugPrint('Document has no data!');
+          //   return const Text('Error - document has no data.');
+          // }
 
-          //print(docData);
-          final progress = ExperimentProgress.fromJson(docData);
-          // print(progress);
+          //final progress = docData;
 
-          return !progress.canLockInSchedule && !progress.canUnlockSchedule
+          return !progress.showScheduleSwitch
               ? Container()
               : Switch(
                   thumbIcon: thumbIcon,
@@ -67,10 +72,10 @@ class LockScheduleSwitch extends ConsumerWidget {
                       // read first round of schedule
                       final firstRound = await ref
                           .read(firestoreScheduleRepositoryProvider)
-                          .getDetailedRound(experimentDocId, 1);
+                          .getRound(experimentDocId, 1);
 
-                      // create tables for first round (non blocking)
-                      ref.read(firestoreTableRepositoryProvider).createTablesFromRound(
+                      // create tables in realtime database
+                      ref.read(realtimeDatabaseRepositoryProvider).addTablesToDatabase(
                             experimentDocId: experimentDocId,
                             round: firstRound,
                           );

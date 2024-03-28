@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_admin/constants.dart';
-import 'package:pencil_game_admin/features/schedule/domain/detailed_round.dart';
+import 'package:pencil_game_admin/features/schedule/domain/round.dart';
 import 'package:pencil_game_admin/firestore/firestore_instance_provider.dart';
 
 import '../../../utils/utils.dart';
@@ -127,12 +127,12 @@ class FirestoreUserRepository {
     }
   }
 
-  /// changes the table number variable for all users based on the current round
+  /// changes the table number variable for all users based on the current round,
   /// this shows the user where to go
-  void changeCurrentTableNumbers(String experimentDocId, DetailedRound round) {
+  void changeCurrentTableNumbers(String experimentDocId, Round round) {
     for (var game in round.games) {
       // get list of uids of playing users and table number
-      final listOfUserUids = game.userPair.map((u) => u.uid).toList();
+      final listOfUserUids = game.assignedUsers.map((u) => u.uid).toList();
       final tableNumber = game.tableNumber;
 
       // update User documents with table numbers

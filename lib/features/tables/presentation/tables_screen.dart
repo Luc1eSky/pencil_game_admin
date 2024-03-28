@@ -1,174 +1,114 @@
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../progress/data/firestore_progress_repository.dart';
 import '../../progress/domain/experiment_progress.dart';
-import '../../user/domain/app_user.dart';
-import '../data/firestore_table_repository.dart';
+import '../data/realtime_database_repository.dart';
+import '../domain/realtime_table.dart';
+import 'widgets/table_card.dart';
 
 class TablesScreen extends ConsumerWidget {
   const TablesScreen({
     super.key,
-    required this.docId,
+    required this.experimentDocId,
   });
 
-  final String docId;
+  final String experimentDocId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 50,
-          child: StreamBuilder(
-              stream: ref.read(firestoreProgressRepositoryProvider).getProgressDocStream(docId),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  debugPrint('Progress doc snapshot error.');
-                  return const Text('Progress doc snapshot error.');
-                }
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final docData = snapshot.data?.data();
-                if (docData == null) {
-                  debugPrint('Document has no data!');
-                  return const Text('Error - document has no data.');
-                }
-                final progress = ExperimentProgress.fromJson(docData);
-                return FittedBox(
-                  child: Text(
-                    'Round: ${progress.currentRoundNumber.toString()}',
-                    style: const TextStyle(fontSize: 200),
-                  ),
-                );
-              }),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: FirestoreListView.separated(
-              query: ref
-                  .read(firestoreTableRepositoryProvider)
-                  .getTablesOfExperimentQuery(experimentDocId: docId),
-              errorBuilder: (context, error, stacktrace) => Text('Error: $error'),
-              itemBuilder: (context, docSnap) {
-                final table = docSnap.data();
-                final assignedUsers = table.assignedUsers;
-                final firstUser = assignedUsers.first;
-                final secondUser = assignedUsers.last;
-                final tableDocRef = docSnap.reference;
-
-                return Card(
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                    leading: Text(
-                      table.tableNumber.toString(),
-                      style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    subtitle: Column(
+    return StreamBuilder<DocumentSnapshot<ExperimentProgress>>(
+      stream: ref.read(firestoreProgressRepositoryProvider).getProgressDocStream(experimentDocId),
+      builder: (context, progressSnap) {
+        if (progressSnap.hasError) {
+          return Text('Snapshot error ${progressSnap.error.toString()}');
+        }
+        if (!progressSnap.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        ExperimentProgress progress;
+        try {
+          progress = progressSnap.data!.data()!;
+        } catch (e) {
+          return Text('Progress object error: $e');
+        }
+        return !progress.showLiveView
+            ? Container()
+            : Column(
+                children: [
+                  SizedBox(
+                    height: 50,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 4,
-                              child: TablePlayerWidget(
-                                user: firstUser,
-                                userIsPresent: table.firstUserIsPresent,
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Container(),
-                            ),
-                            Expanded(
-                              flex: 4,
-                              child: TablePlayerWidget(
-                                user: secondUser,
-                                userIsPresent: table.secondUserIsPresent,
-                              ),
-                            ),
-                          ],
+                        FittedBox(
+                          child: Text(
+                            'Round: ${progress.currentRoundNumber.toString()}',
+                            style: const TextStyle(fontSize: 200),
+                          ),
                         ),
-                        if (table.firstUserIsPresent || table.secondUserIsPresent)
+                        if (progress.status == ExperimentStatus.roundFinished)
                           Padding(
-                            padding: const EdgeInsets.only(top: 20.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    await ref
-                                        .read(firestoreTableRepositoryProvider)
-                                        .removePlayersFromTable(tableDocRef);
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                if (table.hasCorrectUsers)
-                                  ElevatedButton(
-                                    onPressed: () {},
-                                    child: const Text('Start'),
-                                  ),
-                              ],
+                            padding: const EdgeInsets.only(left: 20.0),
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                print('next round');
+                              },
+                              child: const Text('Next Round'),
                             ),
                           ),
                       ],
                     ),
                   ),
-                );
-              },
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: StreamBuilder(
+                        stream: ref
+                            .read(realtimeDatabaseRepositoryProvider)
+                            .getTablesStream(experimentDocId),
+                        builder: (context, realtimeSnap) {
+                          if (realtimeSnap.hasError) {
+                            return Text('Snapshot error ${realtimeSnap.error.toString()}');
+                          }
+                          if (!realtimeSnap.hasData) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          final dataSnap = realtimeSnap.data?.snapshot;
+                          if (dataSnap?.value == null) {
+                            return const Text('Error - No data!');
+                          }
 
-class TablePlayerWidget extends StatelessWidget {
-  const TablePlayerWidget({
-    super.key,
-    required this.user,
-    required this.userIsPresent,
-  });
+                          List<RealtimeTable> tables;
+                          try {
+                            // convert list of maps to list of realtime tables
+                            tables = dataSnap!.children
+                                .map((t) => RealtimeTable.fromJson(t.value as Map<String, dynamic>))
+                                .toList();
+                          } catch (e) {
+                            return Text('Realtime table object error: $e');
+                          }
 
-  final AppUser user;
-  final bool userIsPresent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: userIsPresent ? Colors.green : Colors.grey,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            FittedBox(
-              child: Text(
-                user.colorCode,
-                style: const TextStyle(
-                  fontSize: 24,
-                  //fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            FittedBox(
-              child: Text(
-                user.shortNameString,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
-      ),
+                          return ListView.separated(
+                            itemCount: tables.length,
+                            itemBuilder: (context, index) {
+                              final table = tables[index];
+                              return TableCard(
+                                table: table,
+                                experimentDocId: experimentDocId,
+                                progress: progress,
+                              );
+                            },
+                            separatorBuilder: (context, index) => const SizedBox(height: 20),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              );
+      },
     );
   }
 }

@@ -7,8 +7,12 @@ class ColorPalette {
   Color get background => const Color.fromRGBO(159, 237, 123, 1.0);
   Color get userLoginBackground => const Color.fromRGBO(255, 255, 255, 1.0);
   Color get floatingActionButton => const Color.fromRGBO(197, 168, 255, 1.0);
-
   Color get iconButtonColor => const Color.fromRGBO(197, 168, 255, 1.0);
+
+  Color get playerCardWaiting => const Color.fromRGBO(129, 129, 129, 1.0);
+  Color get playerCardReady => const Color.fromRGBO(159, 237, 123, 1.0);
+  Color get playerCardPlaying => const Color.fromRGBO(84, 212, 228, 1.0);
+  Color get playerCardFinished => const Color.fromRGBO(199, 128, 221, 1.0);
 
   Color get appBarIndicator => const Color.fromRGBO(215, 215, 248, 1.0);
 

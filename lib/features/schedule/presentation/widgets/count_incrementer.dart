@@ -8,13 +8,13 @@ class CountIncrementer extends StatelessWidget {
     required this.count,
     required this.subtract,
     required this.add,
-    required this.isBlocked,
+    required this.isActive,
   });
 
   final int? count;
   final Function subtract;
   final Function add;
-  final bool isBlocked;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class CountIncrementer extends StatelessWidget {
                     child: FittedBox(
                       child: IconButton(
                         iconSize: 25,
-                        onPressed: isBlocked
+                        onPressed: !isActive
                             ? null
                             : () async {
                                 await subtract();
@@ -75,7 +75,7 @@ class CountIncrementer extends StatelessWidget {
                     child: FittedBox(
                       child: IconButton(
                         iconSize: 25,
-                        onPressed: isBlocked
+                        onPressed: !isActive
                             ? null
                             : () async {
                                 await add();

@@ -32,6 +32,7 @@ class AppUser with _$AppUser {
     return jsonMap;
   }
 
+  // TODO: REMOVE ?
   String get shortNameString => '$firstName ${lastName.substring(0, 1)}.';
   String get fullNameString => '$firstName $lastName';
 

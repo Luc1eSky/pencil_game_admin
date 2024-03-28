@@ -7,6 +7,10 @@ const cardMaxWidth = 500.0;
 const maxTriesFromStart = 100;
 const maxRoundTries = 250;
 
+// game related constants
+const startTimeInSeconds = 6;
+const gameTimeInSeconds = 10; // TODO: 120 sec
+
 // database collection and field names
 const adminsCollectionName = 'admins';
 const experimentCollectionName = 'experiments';
@@ -16,7 +20,6 @@ const tableCollectionName = 'tables';
 const userCollectionName = 'users';
 const settingsCollectionName = 'settings';
 const scheduleDocName = 'schedule';
-const detailedScheduleDocName = 'detailedSchedule';
 const parameterDocName = 'parameters';
 const progressDocName = 'progress';
 

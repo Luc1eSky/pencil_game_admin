@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../user/domain/app_user.dart';
+import '../../user/domain/simple_user.dart';
 
 part 'schedule_parameters.freezed.dart';
 part 'schedule_parameters.g.dart';
@@ -9,7 +10,7 @@ part 'schedule_parameters.g.dart';
 class ScheduleParameters with _$ScheduleParameters {
   const ScheduleParameters._();
   const factory ScheduleParameters({
-    required Set<AppUser> allActiveUsers,
+    required Set<SimpleUser> allActiveUsers,
     required int tableCount,
     required int numberOfRounds,
     required int? lastUserCount,
