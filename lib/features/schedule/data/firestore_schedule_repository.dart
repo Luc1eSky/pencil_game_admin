@@ -39,7 +39,7 @@ class FirestoreScheduleRepository {
   }
 
   /// add new detailed schedule document
-  Future<void> addScheduleDocs(String experimentDocId) async {
+  Future<void> addScheduleDoc(String experimentDocId) async {
     // create new empty schedule
     const newSchedule = Schedule(rounds: []);
 
@@ -81,7 +81,7 @@ class FirestoreScheduleRepository {
   }
 
   /// get a detailed round from schedule
-  Future<Round> getRound(
+  Future<Round> getSchedule(
     String experimentDocId,
     int roundNumber,
   ) async {
@@ -108,6 +108,28 @@ class FirestoreScheduleRepository {
     });
 
     return detailedRound;
+  }
+
+  /// get the maximum number of rounds
+  Future<int> getMaxRoundNumber(String experimentDocId) async {
+    final scheduleDocSnap = await _firestore
+        .collection(experimentCollectionName)
+        .doc(experimentDocId)
+        .collection(settingsCollectionName)
+        .doc(scheduleDocName)
+        .get();
+
+    if (!scheduleDocSnap.exists) {
+      throw 'Error - Detailed schedule doc does not exist!';
+    }
+    final scheduleData = scheduleDocSnap.data();
+    if (scheduleData == null) {
+      throw 'Error - Detailed schedule doc does not exist!';
+    }
+
+    final schedule = Schedule.fromJson(scheduleData);
+
+    return schedule.maxRoundNumber;
   }
 
   /// returns a function that increases or decreases either the table count

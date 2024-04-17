@@ -23,7 +23,7 @@ class TablePlayerWidget extends StatelessWidget {
         color: userIsPresent
             ? status == TableStatus.playing
                 ? ColorPalette().playerCardPlaying
-                : status == TableStatus.finished
+                : status == TableStatus.finished || status == TableStatus.resultsCopied
                     ? ColorPalette().playerCardFinished
                     : ColorPalette().playerCardReady
             : ColorPalette().playerCardWaiting,

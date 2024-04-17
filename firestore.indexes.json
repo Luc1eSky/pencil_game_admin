@@ -1,0 +1,24 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "experiments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sharedWithUIDList",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "experimentID",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "tables",
+      "queryScope": "COLLECTION",
+      "fields": []
+    }
+  ],
+  "fieldOverrides": []
+}

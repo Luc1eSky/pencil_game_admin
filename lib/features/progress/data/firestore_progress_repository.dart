@@ -36,7 +36,8 @@ class FirestoreProgressRepository {
     // create progress object with starting data
     const startingProgress = ExperimentProgress(
       currentRoundNumber: 1,
-      status: ExperimentStatus.noSchedule,
+      maximumRoundNumber: 0, // will be set when schedule is created
+      status: ExperimentProgressStatus.noSchedule,
     );
 
     // add document with starting data
@@ -46,7 +47,7 @@ class FirestoreProgressRepository {
   /// change progress status
   Future<void> changeStatus({
     required String experimentDocId,
-    required ExperimentStatus newStatus,
+    required ExperimentProgressStatus newStatus,
   }) async {
     // get doc ref of progress doc of specific experiment
     final docRef = _getProgressDocRef(experimentDocId);
@@ -68,15 +69,32 @@ class FirestoreProgressRepository {
     }
   }
 
+  /// update maximum round number
+  Future<void> updateMaxRoundNumber({
+    required String experimentDocId,
+    required int maxRoundNumber,
+  }) async {
+    try {
+      // get doc ref of progress doc of specific experiment
+      final docSnap = await _getProgressDocRef(experimentDocId).get();
+      final currentProgress = ExperimentProgress.fromJson(docSnap.data()!);
+
+      final updatedProgress = currentProgress.copyWith(maximumRoundNumber: maxRoundNumber);
+      docSnap.reference.update(updatedProgress.toJson());
+    } catch (e) {
+      throw Exception("Error. Could not update maximum round number.\n$e");
+    }
+  }
+
   /// start a round if current status allows to do so
   Future<void> startRound({
     required String experimentDocId,
-    required ExperimentStatus currentStatus,
+    required ExperimentProgressStatus currentStatus,
   }) async {
-    // do nothing if current status is not "lockedSchedule" or "roundWaiting"
-    if (currentStatus != ExperimentStatus.lockedSchedule &&
-        currentStatus != ExperimentStatus.roundWaiting) {
-      debugPrint('Round already started.');
+    // do nothing if current status is not "lockedSchedule" or "roundFinished"
+    if (currentStatus != ExperimentProgressStatus.lockedSchedule &&
+        currentStatus != ExperimentProgressStatus.roundFinished) {
+      debugPrint('Cannot start round. Wrong state.');
       return;
     }
 
@@ -90,19 +108,61 @@ class FirestoreProgressRepository {
         final docSnap = await transaction.get(docRef);
         final dbCurrentProgress = ExperimentProgress.fromJson(docSnap.data()!);
         final dbCurrentStatus = dbCurrentProgress.status;
-        if (dbCurrentStatus != ExperimentStatus.lockedSchedule &&
-            dbCurrentStatus != ExperimentStatus.roundWaiting) {
+        if (dbCurrentStatus != ExperimentProgressStatus.lockedSchedule &&
+            dbCurrentStatus != ExperimentProgressStatus.roundFinished) {
           debugPrint('Cannot start round. Wrong state.');
           return;
         }
         // update progress status to "roundPlaying"
-        final updatedProgress = dbCurrentProgress.copyWith(status: ExperimentStatus.roundPlaying);
+        final updatedProgress =
+            dbCurrentProgress.copyWith(status: ExperimentProgressStatus.roundPlaying);
         transaction.update(docRef, updatedProgress.toJson());
       } catch (e) {
         debugPrint(e.toString());
         return;
       }
     });
+  }
+
+  // move to next round number if possible
+  Future<int?> goToNextRound({
+    required String experimentDocId,
+  }) async {
+    // reference to color code sub-collection in specific experiment
+    final progressDocRef = _firestore
+        .collection(experimentCollectionName)
+        .doc(experimentDocId)
+        .collection(settingsCollectionName)
+        .doc('progress');
+
+    final returnValue = await _firestore.runTransaction((transaction) async {
+      // get doc snap of progress doc
+      final progressDocSnap = await transaction.get(progressDocRef);
+
+      // throw error if document or data was not found
+      if (!progressDocSnap.exists || progressDocSnap.data() == null) {
+        throw 'Document does not exist.';
+      }
+
+      // convert to progress class
+      final progress = ExperimentProgress.fromJson(progressDocSnap.data()!);
+
+      if (!progress.canIncreaseRoundNumber) {
+        return null;
+      }
+
+      final newRoundNumber = progress.currentRoundNumber + 1;
+      final newProgress = progress.copyWith(
+        currentRoundNumber: newRoundNumber,
+        status: ExperimentProgressStatus.roundPlaying,
+      );
+
+      transaction.update(progressDocRef, newProgress.toJson());
+
+      return newRoundNumber;
+    });
+
+    return returnValue;
   }
 }
 

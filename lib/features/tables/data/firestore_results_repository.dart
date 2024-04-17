@@ -19,20 +19,24 @@ class FirestoreResultsRepository {
   Future<void> addResultToExperiment({
     required experimentDocId,
     required int roundNumber,
-    required int tableNumber,
     required RealtimeTable table,
-    // required List<NumberCopyResult> numberResultsPerUser,
-    // required List<Click> clicks,
   }) async {
     // get reference to new result doc with auto id
     final resultsCollectionRef =
         _firestore.collection(experimentCollectionName).doc(experimentDocId).collection('results');
 
+    final startedOn = table.startedOn;
+    final endedOn = table.endedOn;
+    if (startedOn == null || endedOn == null) {
+      throw Exception('Error - startedOn or endedOn was null (expected DateTime).');
+    }
+
     final newResult = FirestoreResult(
+      users: table.usersAtTable,
       roundNumber: roundNumber,
-      tableNumber: tableNumber,
-      startedOn: table.startedOn!,
-      endedOn: table.endedOn!,
+      tableNumber: table.tableNumber,
+      startedOn: startedOn,
+      endedOn: endedOn,
       clicks: table.archivedClicks ?? [],
       numberCopyResults: table.numberCopyResults ?? [],
     );

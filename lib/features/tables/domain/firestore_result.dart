@@ -1,7 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../utils/utils.dart';
+import '../../user/domain/simple_user.dart';
 import 'click.dart';
 import 'number_copy_result.dart';
 
@@ -12,6 +13,7 @@ part 'firestore_result.g.dart';
 class FirestoreResult with _$FirestoreResult {
   //const FirestoreResult._();
   const factory FirestoreResult({
+    required Set<SimpleUser>? users,
     required int roundNumber,
     required int tableNumber,
     @TimestampConverter() required DateTime startedOn,

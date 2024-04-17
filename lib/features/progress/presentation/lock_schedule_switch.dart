@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pencil_game_admin/features/tables/data/realtime_database_repository.dart';
+import 'package:pencil_game_admin/features/schedule/application/schedule_service.dart';
 
-import '../../schedule/data/firestore_schedule_repository.dart';
-import '../../user/data/firestore_user_repository.dart';
 import '../data/firestore_progress_repository.dart';
 import '../domain/experiment_progress.dart';
 
@@ -38,54 +36,17 @@ class LockScheduleSwitch extends ConsumerWidget {
           } catch (e) {
             return const Text('Progress object conversion error.');
           }
-          // final progress = snapshot.data?.data();
-          // if (progress == null) {
-          //   debugPrint('Document has no data!');
-          //   return const Text('Error - document has no data.');
-          // }
-
-          //final progress = docData;
 
           return !progress.showScheduleSwitch
               ? Container()
               : Switch(
                   thumbIcon: thumbIcon,
-                  value: progress.status == ExperimentStatus.lockedSchedule,
+                  value: progress.status == ExperimentProgressStatus.lockedSchedule,
                   onChanged: (bool value) async {
-                    // if currently locked, change status to "scheduled"
-                    if (progress.status == ExperimentStatus.lockedSchedule) {
-                      await ref.read(firestoreProgressRepositoryProvider).changeStatus(
-                            experimentDocId: experimentDocId,
-                            newStatus: ExperimentStatus.scheduled,
-                          );
-
-                      // reset current table number of all users (set to null)
-                      ref.read(firestoreUserRepositoryProvider).resetTableNumber(experimentDocId);
-                    }
-                    // if currently scheduled, change status to "lockedSchedule"
-                    else if (progress.status == ExperimentStatus.scheduled) {
-                      await ref.read(firestoreProgressRepositoryProvider).changeStatus(
-                            experimentDocId: experimentDocId,
-                            newStatus: ExperimentStatus.lockedSchedule,
-                          );
-
-                      // read first round of schedule
-                      final firstRound = await ref
-                          .read(firestoreScheduleRepositoryProvider)
-                          .getRound(experimentDocId, 1);
-
-                      // create tables in realtime database
-                      ref.read(realtimeDatabaseRepositoryProvider).addTablesToDatabase(
-                            experimentDocId: experimentDocId,
-                            round: firstRound,
-                          );
-
-                      // change current table number of all users
-                      ref.read(firestoreUserRepositoryProvider).changeCurrentTableNumbers(
-                            experimentDocId,
-                            firstRound,
-                          );
-                    }
+                    ref.read(scheduleServiceProvider).lockOrUnlockSchedule(
+                          experimentDocId: experimentDocId,
+                          status: progress.status,
+                        );
                   },
                 );
         });

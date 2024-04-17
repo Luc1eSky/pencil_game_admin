@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pencil_game_admin/features/survey/data/firestore_survey_repository.dart';
 
 import '../../admin/data/firestore_admin_repository.dart';
 import '../../progress/data/firestore_progress_repository.dart';
@@ -13,6 +14,7 @@ class ExperimentService {
     required this.firestoreColorCodesRepository,
     required this.firestoreScheduleRepository,
     required this.firestoreProgressRepository,
+    required this.firestoreSurveyRepository,
   });
 
   final FirestoreExperimentRepository firestoreExperimentRepository;
@@ -20,6 +22,7 @@ class ExperimentService {
   final FirestoreColorCodesRepository firestoreColorCodesRepository;
   final FirestoreScheduleRepository firestoreScheduleRepository;
   final FirestoreProgressRepository firestoreProgressRepository;
+  final FirestoreSurveyRepository firestoreSurveyRepository;
 
   /// adding a new experiment, schedules, etc.
   Future<void> addNewExperiment({
@@ -51,11 +54,18 @@ class ExperimentService {
     // add new parameter document
     firestoreScheduleRepository.addParameterDoc(experimentDocId);
 
-    // add new schedule documents
-    firestoreScheduleRepository.addScheduleDocs(experimentDocId);
+    // add new schedule document
+    firestoreScheduleRepository.addScheduleDoc(experimentDocId);
 
     // add new progress document
     firestoreProgressRepository.addProgressDoc(experimentDocId);
+
+    // add survey document
+    //TODO: REPLACE HARDCODED LINK
+    firestoreSurveyRepository.addSurveyToExperiment(
+      experimentDocId: experimentDocId,
+      surveyLink: 'https://qualtricsxmbbg76g22x.qualtrics.com/jfe/form/SV_09ydhOQ6NeOsBcG',
+    );
   }
 }
 
@@ -66,5 +76,6 @@ final experimentServiceProvider = Provider<ExperimentService>((ref) {
     firestoreColorCodesRepository: ref.watch(firestoreColorCodesRepositoryProvider),
     firestoreScheduleRepository: ref.watch(firestoreScheduleRepositoryProvider),
     firestoreProgressRepository: ref.watch(firestoreProgressRepositoryProvider),
+    firestoreSurveyRepository: ref.watch(firestoreSurveyRepositoryProvider),
   );
 });

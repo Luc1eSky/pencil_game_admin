@@ -169,6 +169,24 @@ class FirestoreUserRepository {
       _getUserCollectionRef(experimentDocId).doc(updatedUser.uid).update(updatedUser.toFirestore());
     }
   }
+
+  // delete user entry in experiment and in root users collection
+  Future<void> deleteUser({
+    required String experimentDocId,
+    required AppUser user,
+  }) async {
+    print('DELETING USER ${user.firstName} FROM EXPERIMENT: $experimentDocId');
+    // delete user from experiment
+    await _firestore
+        .collection(experimentCollectionName)
+        .doc(experimentDocId)
+        .collection(userCollectionName)
+        .doc(user.uid)
+        .delete();
+
+    // delete user from user collection
+    await _firestore.collection(userCollectionName).doc(user.uid).delete();
+  }
 }
 
 final firestoreUserRepositoryProvider = Provider<FirestoreUserRepository>((ref) {

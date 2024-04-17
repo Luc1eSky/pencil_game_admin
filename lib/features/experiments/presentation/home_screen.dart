@@ -103,7 +103,7 @@ class HomeScreen extends StatelessWidget {
                   },
                 );
               }
-              // if new was selected open add experiment dialog
+              // if new was selected open join experiment dialog
               if (result == 'join' && context.mounted) {
                 await showDialog(
                   barrierDismissible: false,

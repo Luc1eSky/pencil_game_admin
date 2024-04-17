@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pencil_game_admin/features/schedule/application/schedule_service.dart';
 
 import '../../../style/color_palette.dart';
 import '../../progress/data/firestore_progress_repository.dart';
@@ -148,30 +149,11 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                   isCalculating = true;
                                 });
                                 try {
-                                  // calculate schedule (null if there was an error)
-                                  final schedule = await ref
-                                      .read(firestoreScheduleRepositoryProvider)
-                                      .calculateSchedule(
-                                        experimentDocId: widget.experimentDocId,
-                                      );
-
-                                  if (schedule == null) {
-                                    throw Exception('Error - Could not calculate schedule.');
-                                  }
-
-                                  // update schedule documents
                                   await ref
-                                      .read(firestoreScheduleRepositoryProvider)
-                                      .updateSchedule(
-                                        experimentDocId: widget.experimentDocId,
-                                        schedule: schedule,
-                                      );
-
-                                  // set status to "scheduled"
-                                  await ref.read(firestoreProgressRepositoryProvider).changeStatus(
-                                      experimentDocId: widget.experimentDocId,
-                                      newStatus: ExperimentStatus.scheduled);
+                                      .read(scheduleServiceProvider)
+                                      .createSchedule(experimentDocId: widget.experimentDocId);
                                 } catch (error) {
+                                  print(error);
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(

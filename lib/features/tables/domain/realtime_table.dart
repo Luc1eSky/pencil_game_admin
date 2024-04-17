@@ -63,5 +63,6 @@ enum TableStatus {
   waiting,
   playing,
   finished,
+  resultsCopied,
   aborted,
 }

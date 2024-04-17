@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_admin/features/schedule/domain/round.dart';
@@ -30,10 +32,10 @@ class RealtimeDatabaseRepository {
     required String experimentDocId,
     required Round round,
   }) async {
-    // get tables ref in RTDB
+    // get tables ref of experiment in RTDB
     final tablesRef = realtimeDatabase.ref(experimentDocId).child('tables');
 
-    // remove current tables
+    // remove current tables of experiment
     await tablesRef.remove();
 
     // go through all games and add tables
@@ -42,9 +44,6 @@ class RealtimeDatabaseRepository {
       final table = RealtimeTable(
         tableNumber: game.tableNumber,
         assignedUsers: game.assignedUsers,
-        //usersAtTable: {},
-        //uidThatHasPen: 'someOne',
-        //currentClicks: [],
         // status: default is waiting
       );
 
@@ -63,7 +62,8 @@ class RealtimeDatabaseRepository {
         realtimeDatabase.ref(experimentDocId).child('tables').child('table$tableNumber');
     // create table object from data
     final tableSnap = await tableRef.get();
-    final table = RealtimeTable.fromJson(tableSnap.value as Map<String, dynamic>);
+    final table = RealtimeTable.fromJson(jsonDecode(jsonEncode(tableSnap.value)));
+    //  tableSnap.value as Map<String, dynamic>);
     // create updated table with no users
     final updatedTable = table.copyWith(usersAtTable: null);
     // update data in RTDB
@@ -71,7 +71,7 @@ class RealtimeDatabaseRepository {
   }
 
   /// start game at table
-  Future<void> startTable({
+  Future<bool> startTable({
     required String experimentDocId,
     required int tableNumber,
   }) async {
@@ -79,22 +79,25 @@ class RealtimeDatabaseRepository {
     final tableRef =
         realtimeDatabase.ref(experimentDocId).child('tables').child('table$tableNumber');
 
-    await tableRef.runTransaction((Object? tableValue) {
+    final result = await tableRef.runTransaction((Object? tableValue) {
       // exit in case there is no table
       if (tableValue == null) {
+        print('No table found.');
         return Transaction.abort();
       }
 
       // convert data to table object
-      final table = RealtimeTable.fromJson(tableValue as Map<String, dynamic>);
+      final table = RealtimeTable.fromJson(jsonDecode(jsonEncode(tableValue)));
 
       // exit in case any user dropped out
-      if (!table.hasCorrectUsers) {
+      if (!table.hasCorrectUsers && !inDebuggingMode) {
+        print('Missing users at table.');
         return Transaction.abort();
       }
 
       // exit in case table was already started
       if (table.status != TableStatus.waiting) {
+        print('Table was already started.');
         return Transaction.abort();
       }
 
@@ -111,8 +114,11 @@ class RealtimeDatabaseRepository {
       );
 
       // update data in database
+      print('Table was started.');
       return Transaction.success(updatedTable.toJson());
     });
+
+    return result.committed;
   }
 
   /// get table
@@ -135,25 +141,25 @@ class RealtimeDatabaseRepository {
     }
   }
 
-  /// set table status to finished
-  Future<void> setTableToFinished({
-    required String experimentDocId,
-    required int tableNumber,
-  }) async {
-    try {
-      // get tables ref in RTDB
-      final tableRef =
-          realtimeDatabase.ref(experimentDocId).child('tables').child('table$tableNumber');
-
-      // create table object from data
-      final tableSnap = await tableRef.get();
-      final table = RealtimeTable.fromJson(tableSnap.value as Map<String, dynamic>);
-      final updatedTable = table.copyWith(status: TableStatus.finished);
-      await tableRef.update(updatedTable.toJson());
-    } catch (e) {
-      throw Exception("Error. Could not set table to finished.\n$e");
-    }
-  }
+  // /// set table status to finished
+  // Future<void> setTableToFinished({
+  //   required String experimentDocId,
+  //   required int tableNumber,
+  // }) async {
+  //   try {
+  //     // get tables ref in RTDB
+  //     final tableRef =
+  //         realtimeDatabase.ref(experimentDocId).child('tables').child('table$tableNumber');
+  //
+  //     // create table object from data
+  //     final tableSnap = await tableRef.get();
+  //     final table = RealtimeTable.fromJson(tableSnap.value as Map<String, dynamic>);
+  //     final updatedTable = table.copyWith(status: TableStatus.finished);
+  //     await tableRef.update(updatedTable.toJson());
+  //   } catch (e) {
+  //     throw Exception("Error. Could not set table to finished.\n$e");
+  //   }
+  // }
 
   /// check if all tables have status "finished"
   Future<bool> checkIfAllTablesAreFinished({

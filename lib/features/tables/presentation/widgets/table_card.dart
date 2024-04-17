@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_admin/features/progress/domain/experiment_progress.dart';
-import 'package:pencil_game_admin/features/tables/data/database_time_offset_provider.dart';
-import 'package:pencil_game_admin/features/tables/presentation/widgets/timer_widget.dart';
 
+import '../../../../constants.dart';
 import '../../../progress/data/firestore_progress_repository.dart';
 import '../../../user/domain/simple_user.dart';
+import '../../data/functions_repository.dart';
 import '../../data/realtime_database_repository.dart';
 import '../../domain/realtime_table.dart';
 import 'pen_indicator.dart';
@@ -61,41 +61,54 @@ class TableCard extends ConsumerWidget {
                 ),
               ],
             ),
-            // show buttons only when status is "waiting"
-            if (table.status == TableStatus.waiting)
+            // show buttons only when at least one user is present and table status is waiting
+            if ((inDebuggingMode || table.firstUserIsPresent || table.secondUserIsPresent) &&
+                table.status == TableStatus.waiting)
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // show cancel button if any user is present
-                    if (table.firstUserIsPresent || table.secondUserIsPresent)
-                      ElevatedButton(
-                        onPressed: () async {
-                          try {
-                            await ref.read(realtimeDatabaseRepositoryProvider).removeUsersFromTable(
-                                  experimentDocId: experimentDocId,
-                                  tableNumber: table.tableNumber,
-                                );
-                          } catch (e) {
-                            //TODO: ERROR HANDLING
-                            debugPrint(e.toString());
-                          }
-                        },
-                        child: const Text('Cancel'),
-                      ),
+                    // show cancel button
+                    ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          await ref.read(realtimeDatabaseRepositoryProvider).removeUsersFromTable(
+                                experimentDocId: experimentDocId,
+                                tableNumber: table.tableNumber,
+                              );
+                        } catch (e) {
+                          //TODO: ERROR HANDLING
+                          debugPrint(e.toString());
+                        }
+                      },
+                      child: const Text('Cancel'),
+                    ),
 
                     // show start button if all users are present
-                    if (table.hasCorrectUsers)
+                    if (table.hasCorrectUsers || inDebuggingMode)
                       Padding(
                         padding: const EdgeInsets.only(left: 50.0),
                         child: ElevatedButton(
                           onPressed: () async {
                             try {
+                              // TODO: MOVE TO SERVICE
                               // start the table
-                              await ref.read(realtimeDatabaseRepositoryProvider).startTable(
+                              final tableStarted =
+                                  await ref.read(realtimeDatabaseRepositoryProvider).startTable(
+                                        experimentDocId: experimentDocId,
+                                        tableNumber: table.tableNumber,
+                                      );
+                              // exit if table could not be started
+                              if (!tableStarted) {
+                                return;
+                              }
+
+                              // start cloud function that finishes the game after certain time
+                              await ref.read(functionsRepositoryProvider).delayedClosingGame(
                                     experimentDocId: experimentDocId,
                                     tableNumber: table.tableNumber,
+                                    waitTimeInSeconds: gameTimeInSeconds + startTimeInSeconds + 1,
                                   );
 
                               // set progress to indicate a round has started
@@ -114,29 +127,30 @@ class TableCard extends ConsumerWidget {
                   ],
                 ),
               ),
-
+            const SizedBox(height: 20.0),
             // show pen indicator while playing
             //if (table.status == TableStatus.playing)
             SizedBox(
-              height: 40,
+              height: 30,
               child: FractionallySizedBox(
-                heightFactor: 0.7,
+                heightFactor: 1.0,
                 child: Row(
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: FittedBox(
-                          child: TimerWidget(
-                            experimentDocId: experimentDocId,
-                            table: table,
-                            databaseOffset: ref.watch(databaseTimeOffsetRepositoryProvider),
-                            size: 100,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // TODO: ADD TIMER BACK IN (FIX NULL ERROR!)
+                    // Expanded(
+                    //   flex: 2,
+                    //   child: Align(
+                    //     alignment: Alignment.centerLeft,
+                    //     child: FittedBox(
+                    //       child: TimerWidget(
+                    //         experimentDocId: experimentDocId,
+                    //         table: table,
+                    //         databaseOffset: ref.watch(databaseTimeOffsetRepositoryProvider),
+                    //         size: 100,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                     Expanded(
                       child: FractionallySizedBox(
                         heightFactor: 0.9,
@@ -168,28 +182,28 @@ class TableCard extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.red,
-                          ),
-                          child: IconButton(
-                            color: Colors.white,
-                            onPressed: () {},
-                            icon: const FittedBox(
-                              child: Icon(
-                                Icons.close,
-                                size: 50,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    // Expanded(
+                    //   flex: 2,
+                    //   child: Align(
+                    //     alignment: Alignment.centerRight,
+                    //     child: Container(
+                    //       decoration: const BoxDecoration(
+                    //         shape: BoxShape.circle,
+                    //         color: Colors.red,
+                    //       ),
+                    //       child: IconButton(
+                    //         color: Colors.white,
+                    //         onPressed: () {},
+                    //         icon: const FittedBox(
+                    //           child: Icon(
+                    //             Icons.close,
+                    //             size: 50,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

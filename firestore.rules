@@ -1,0 +1,116 @@
+rules_version = '2';
+
+// an admin is a signed in user with a verified email
+function isAdmin() {
+  return request.auth.uid != null && request.auth.token.email_verified == true;
+}
+
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // allow to admins to read color codes
+    // this is needed when an experiment is created
+    match /colorCodes/{colorCode} {
+      allow read: if isAdmin();
+      //allow write: if true;
+    }
+  
+    // only allow admins to read and write admin share codes
+    match /adminShareCodes/{adminCode} {
+      allow read, write: if isAdmin();
+    }
+    
+    // allow all signed in admins and users to read and write user share codes
+    match /userShareCodes/{userCode} {
+      allow read, write: if request.auth.uid != null;
+    }
+    
+    // only allow admins to create admin documents
+    // only allow an admin to read and write their own admin document
+    match /admins/{adminDoc} {
+    	allow create: if isAdmin();
+      allow read, write: if isAdmin() && adminDoc == request.auth.uid ;
+    }
+    
+  	// Only allow user to access their own document
+    // TODO: ONLY ALLOW ADMINS THAT HAVE ACCESS TO EXPERIMENT TO READ?WRITE USER DOCS WITH SAME EXPERIMENT
+  	match /users/{userId} {
+  		allow read,write: if request.auth.uid != null && userId == request.auth.uid;
+      allow read,write: if isAdmin(); // TODO ABOVE IS CHANGED HERE
+  	}
+    
+    // only allow admins to create new experiments
+    // only allow admins that are part of experiment (experiment is in admin experiment list)
+    // to read and write those experiments
+    // TODO: USERS CAN ONLY UPDATE THE COUNT
+    match /experiments/{experimentId} {
+    	allow create: if isAdmin();
+    	allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments || experimentId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.experimentDocId;
+    
+    
+      // Only allow admins that have access to the parent experiment 
+      // to also have access to the results collection
+      match /results/{resultDocId} {
+    		allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+      }
+      
+      // Only allow admins that have access to the parent experiment 
+      // to also have access to the colorCodes document
+      match /colorCodes/colorCodes {
+    		allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+      }
+      
+      // Only allow admins that have access to the parent experiment 
+      // to also have access to the progress document
+      match /settings/progress {
+    		allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+      }    
+      
+      // Only allow admins and users that have access to the parent experiment 
+      // to also have access to the parameters file
+      // TODO: USE CLOUD FUNCTION TO SYNCHRONIZE / ADD USER TO LIST
+      match /settings/parameters {
+    		allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+        allow read, write: if experimentId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.experimentDocId;
+      }
+
+      // Only allow admins and users that have access to the parent experiment 
+      // to also have access to the parameters file (users read only)
+      match /settings/survey {
+    		allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+        allow read: if experimentId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.experimentDocId;
+      }
+      
+      // Only allow admins that have access to the parent experiment 
+      // to also have access to the detailed schedule file
+      match /settings/detailedSchedule {
+    		allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+      } 
+      
+      // Only allow admins and users that have access to the parent experiment 
+      // to also have access to the schedule file
+      match /settings/schedule {
+    		allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+        allow read, write: if experimentId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.experimentDocId;
+      } 
+                
+      // Only allow user to read and write their own document
+      // Only allow admins that have access to the parent experiment 
+      // to also have read access to the users subcollection
+      match /users/{userId} {
+        allow read, write: if request.auth.uid != null && userId == request.auth.uid || experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+    		allow read, write: if request.auth.uid != null && userId == request.auth.uid;
+      }
+      
+      // Only allow admins that have access to the parent experiment 
+      // to also have access to the tables subcollection
+      // Only allow users to read/write the table that they are assigned to
+      match /tables/{tableId} {
+				allow read, write: if experimentId in get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.experiments;
+        allow read, write: if tableId == 'table' + string(get(/databases/$(database)/documents/experiments/$(experimentId)/users/$(request.auth.uid)).data.currentTableNumber);
+      }
+            
+    }
+  }
+}
