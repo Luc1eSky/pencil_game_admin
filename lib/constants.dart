@@ -1,5 +1,5 @@
 const appName = 'Pencil Game Admin Console';
-const bool inDebuggingMode = true; // use emulators or not
+const bool inDebuggingMode = false; // use emulators or not
 
 const appBarHeight = 60.0;
 const cardMaxWidth = 500.0;
@@ -10,7 +10,7 @@ const maxRoundTries = 250;
 
 // game related constants
 const startTimeInSeconds = 6;
-const gameTimeInSeconds = 60; // TODO: 120 sec
+const gameTimeInSeconds = 180; // TODO: 120 sec
 
 // database collection and field names
 const adminsCollectionName = 'admins';

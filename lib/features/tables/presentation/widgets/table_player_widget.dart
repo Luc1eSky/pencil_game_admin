@@ -23,7 +23,8 @@ class TablePlayerWidget extends StatelessWidget {
         color: userIsPresent
             ? status == TableStatus.playing
                 ? ColorPalette().playerCardPlaying
-                : status == TableStatus.finished || status == TableStatus.resultsCopied
+                : status == TableStatus.finished ||
+                        status == TableStatus.resultsCopied
                     ? ColorPalette().playerCardFinished
                     : ColorPalette().playerCardReady
             : ColorPalette().playerCardWaiting,
@@ -44,7 +45,7 @@ class TablePlayerWidget extends StatelessWidget {
             ),
             FittedBox(
               child: Text(
-                user.shortNameString,
+                user.firstName,
                 style: const TextStyle(fontSize: 14),
               ),
             ),

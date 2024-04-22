@@ -16,13 +16,16 @@ class UserListView extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: FirestoreListView.separated(
-        query: ref.read(firestoreUserRepositoryProvider).getUsersQuery(experimentDocId),
+        query: ref
+            .read(firestoreUserRepositoryProvider)
+            .getUsersQuery(experimentDocId),
         errorBuilder: (context, error, stacktrace) => Text('Error: $error'),
         itemBuilder: (context, docSnap) {
           final user = docSnap.data();
           return Card(
             child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
                 leading: Text(
                   user.colorCode,
                   style: const TextStyle(
@@ -34,7 +37,7 @@ class UserListView extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${user.firstName} ${user.lastName}',
+                      user.firstName,
                       style: const TextStyle(fontSize: 18),
                     ),
                     Text(

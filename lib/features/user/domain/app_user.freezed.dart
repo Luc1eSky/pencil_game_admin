@@ -21,7 +21,6 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$AppUser {
   String get firstName => throw _privateConstructorUsedError;
-  String get lastName => throw _privateConstructorUsedError;
   String get uid => throw _privateConstructorUsedError;
   String get colorCode => throw _privateConstructorUsedError;
   String get experimentDocId => throw _privateConstructorUsedError;
@@ -41,7 +40,6 @@ abstract class $AppUserCopyWith<$Res> {
   @useResult
   $Res call(
       {String firstName,
-      String lastName,
       String uid,
       String colorCode,
       String experimentDocId,
@@ -63,7 +61,6 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
   @override
   $Res call({
     Object? firstName = null,
-    Object? lastName = null,
     Object? uid = null,
     Object? colorCode = null,
     Object? experimentDocId = null,
@@ -74,10 +71,6 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
       firstName: null == firstName
           ? _value.firstName
           : firstName // ignore: cast_nullable_to_non_nullable
-              as String,
-      lastName: null == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
               as String,
       uid: null == uid
           ? _value.uid
@@ -112,7 +105,6 @@ abstract class _$$AppUserImplCopyWith<$Res> implements $AppUserCopyWith<$Res> {
   @useResult
   $Res call(
       {String firstName,
-      String lastName,
       String uid,
       String colorCode,
       String experimentDocId,
@@ -132,7 +124,6 @@ class __$$AppUserImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? firstName = null,
-    Object? lastName = null,
     Object? uid = null,
     Object? colorCode = null,
     Object? experimentDocId = null,
@@ -143,10 +134,6 @@ class __$$AppUserImplCopyWithImpl<$Res>
       firstName: null == firstName
           ? _value.firstName
           : firstName // ignore: cast_nullable_to_non_nullable
-              as String,
-      lastName: null == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
               as String,
       uid: null == uid
           ? _value.uid
@@ -177,7 +164,6 @@ class __$$AppUserImplCopyWithImpl<$Res>
 class _$AppUserImpl extends _AppUser {
   const _$AppUserImpl(
       {required this.firstName,
-      required this.lastName,
       required this.uid,
       required this.colorCode,
       required this.experimentDocId,
@@ -190,8 +176,6 @@ class _$AppUserImpl extends _AppUser {
 
   @override
   final String firstName;
-  @override
-  final String lastName;
   @override
   final String uid;
   @override
@@ -206,7 +190,7 @@ class _$AppUserImpl extends _AppUser {
 
   @override
   String toString() {
-    return 'AppUser(firstName: $firstName, lastName: $lastName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, currentTableNumber: $currentTableNumber, createdOn: $createdOn)';
+    return 'AppUser(firstName: $firstName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, currentTableNumber: $currentTableNumber, createdOn: $createdOn)';
   }
 
   @JsonKey(ignore: true)
@@ -226,7 +210,6 @@ class _$AppUserImpl extends _AppUser {
 abstract class _AppUser extends AppUser {
   const factory _AppUser(
       {required final String firstName,
-      required final String lastName,
       required final String uid,
       required final String colorCode,
       required final String experimentDocId,
@@ -238,8 +221,6 @@ abstract class _AppUser extends AppUser {
 
   @override
   String get firstName;
-  @override
-  String get lastName;
   @override
   String get uid;
   @override

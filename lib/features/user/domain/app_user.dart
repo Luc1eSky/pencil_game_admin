@@ -11,7 +11,6 @@ class AppUser with _$AppUser {
   const AppUser._();
   const factory AppUser({
     required String firstName,
-    required String lastName,
     required String uid,
     required String colorCode,
     required String experimentDocId,
@@ -19,7 +18,8 @@ class AppUser with _$AppUser {
     @TimestampConverter() required DateTime createdOn,
   }) = _AppUser;
 
-  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+  factory AppUser.fromJson(Map<String, dynamic> json) =>
+      _$AppUserFromJson(json);
 
   factory AppUser.fromFirestore(Map<String, dynamic> firestoreMap, String uid) {
     firestoreMap['uid'] = uid;
@@ -32,15 +32,13 @@ class AppUser with _$AppUser {
     return jsonMap;
   }
 
-  // TODO: REMOVE ?
-  String get shortNameString => '$firstName ${lastName.substring(0, 1)}.';
-  String get fullNameString => '$firstName $lastName';
-
   // only consider uid for equality
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        other is AppUser && runtimeType == other.runtimeType && uid == other.uid;
+        other is AppUser &&
+            runtimeType == other.runtimeType &&
+            uid == other.uid;
   }
 
   @override

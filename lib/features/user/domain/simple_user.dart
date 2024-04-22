@@ -8,12 +8,10 @@ class SimpleUser with _$SimpleUser {
   const SimpleUser._();
   const factory SimpleUser({
     required String firstName,
-    required String lastName,
     required String uid,
     required String colorCode,
   }) = _SimpleUser;
 
-  factory SimpleUser.fromJson(Map<String, dynamic> json) => _$SimpleUserFromJson(json);
-
-  String get shortNameString => '$firstName ${lastName.substring(0, 1)}.';
+  factory SimpleUser.fromJson(Map<String, dynamic> json) =>
+      _$SimpleUserFromJson(json);
 }

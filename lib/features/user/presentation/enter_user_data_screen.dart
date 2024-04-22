@@ -24,14 +24,12 @@ class EnterUserDataScreen extends StatefulWidget {
 
 class _EnterUserDataScreenState extends State<EnterUserDataScreen> {
   final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
   bool buttonIsActive = true;
 
   @override
   void dispose() {
     super.dispose();
     firstNameController.dispose();
-    lastNameController.dispose();
   }
 
   @override
@@ -87,22 +85,22 @@ class _EnterUserDataScreenState extends State<EnterUserDataScreen> {
                                 //icon: Icon(Icons.person),
                               ),
                             ),
-                            TextFormField(
-                              controller: lastNameController,
-                              maxLength: 30,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your last name';
-                                }
-                                return null;
-                              },
-                              decoration: const InputDecoration(
-                                hintText: 'Enter last name',
-                                labelText: 'Last Name',
-                                //icon: Icon(Icons.person),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
+                            // TextFormField(
+                            //   controller: lastNameController,
+                            //   maxLength: 30,
+                            //   validator: (value) {
+                            //     if (value == null || value.isEmpty) {
+                            //       return 'Please enter your last name';
+                            //     }
+                            //     return null;
+                            //   },
+                            //   decoration: const InputDecoration(
+                            //     hintText: 'Enter last name',
+                            //     labelText: 'Last Name',
+                            //     //icon: Icon(Icons.person),
+                            //   ),
+                            // ),
+                            // const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -122,31 +120,38 @@ class _EnterUserDataScreenState extends State<EnterUserDataScreen> {
                                           ? null
                                           : () async {
                                               // only proceed if form entries are valid
-                                              if (!_formKey.currentState!.validate()) {
+                                              if (!_formKey.currentState!
+                                                  .validate()) {
                                                 return;
                                               }
                                               // deactivate buttons to prevent multiple clicks
-                                              setState(() => buttonIsActive = false);
+                                              setState(
+                                                  () => buttonIsActive = false);
 
                                               // try to create share code
                                               try {
                                                 final userShareCode = await ref
-                                                    .read(firestoreUserRepositoryProvider)
+                                                    .read(
+                                                        firestoreUserRepositoryProvider)
                                                     .createUserShareCodeEntry(
-                                                      experimentDocId: widget.docId,
-                                                      firstName: firstNameController.text,
-                                                      lastName: lastNameController.text,
+                                                      experimentDocId:
+                                                          widget.docId,
+                                                      firstName:
+                                                          firstNameController
+                                                              .text,
                                                     );
                                                 if (userShareCode == null) {
                                                   throw 'Could not create share code.';
                                                 }
                                                 // if successful move to QR code screen
                                                 if (context.mounted) {
-                                                  Navigator.of(context).pushReplacement(
+                                                  Navigator.of(context)
+                                                      .pushReplacement(
                                                     MaterialPageRoute(
                                                       builder: (context) {
                                                         return QrCodeScreen(
-                                                          userShareCode: userShareCode,
+                                                          userShareCode:
+                                                              userShareCode,
                                                         );
                                                       },
                                                     ),
@@ -157,12 +162,16 @@ class _EnterUserDataScreenState extends State<EnterUserDataScreen> {
                                               // if an error occurs: show error, activate buttons
                                               // and allow retry
                                               catch (error) {
-                                                debugPrint('Error while trying to create user '
+                                                debugPrint(
+                                                    'Error while trying to create user '
                                                     'share code entry.');
                                                 if (context.mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
                                                     SnackBar(
-                                                      backgroundColor: ColorPalette().snackBarError,
+                                                      backgroundColor:
+                                                          ColorPalette()
+                                                              .snackBarError,
                                                       content: const Text(
                                                         'Error while trying to create user '
                                                         'share code.',
@@ -172,7 +181,8 @@ class _EnterUserDataScreenState extends State<EnterUserDataScreen> {
                                                 }
                                               }
 
-                                              setState(() => buttonIsActive = true);
+                                              setState(
+                                                  () => buttonIsActive = true);
                                             },
                                       child: const Text('Submit'),
                                     );
