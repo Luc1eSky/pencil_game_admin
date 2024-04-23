@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_admin/features/schedule/application/schedule_service.dart';
+import 'package:pencil_game_admin/features/tables/data/firestore_results_repository.dart';
 
 import '../../../style/color_palette.dart';
 import '../../progress/data/firestore_progress_repository.dart';
@@ -23,6 +24,7 @@ class ScheduleScreen extends ConsumerStatefulWidget {
 
 class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   bool isCalculating = false;
+  bool isExporting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +174,24 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                       ),
                     ),
                     LockScheduleSwitch(experimentDocId: widget.experimentDocId),
+                    if (progress.status == ExperimentProgressStatus.surveyLinkDisplayed)
+                      ElevatedButton(
+                        onPressed: isExporting
+                            ? null
+                            : () async {
+                                setState(() {
+                                  isExporting = true;
+                                });
+
+                                await ref
+                                    .read(firestoreResultsRepositoryProvider)
+                                    .exportToExcel(experimentDocId: widget.experimentDocId);
+                                setState(() {
+                                  isExporting = false;
+                                });
+                              },
+                        child: const Text('Export Data'),
+                      ),
                   ],
                 ),
                 Expanded(

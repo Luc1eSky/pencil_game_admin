@@ -23,6 +23,7 @@ const settingsCollectionName = 'settings';
 const scheduleDocName = 'schedule';
 const parameterDocName = 'parameters';
 const progressDocName = 'progress';
+const resultsCollectionName = 'results';
 
 const adminUidFieldName = 'adminUid';
 const sharedAdminListName = 'sharedWithAdminUids';
