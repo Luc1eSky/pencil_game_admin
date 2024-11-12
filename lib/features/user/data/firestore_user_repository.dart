@@ -6,6 +6,7 @@ import 'package:pencil_game_admin/features/schedule/domain/round.dart';
 import 'package:pencil_game_admin/firestore/firestore_instance_provider.dart';
 
 import '../../../utils/utils.dart';
+import '../../schedule/domain/schedule_parameters.dart';
 import '../domain/app_user.dart';
 
 class FirestoreUserRepository {
@@ -14,8 +15,7 @@ class FirestoreUserRepository {
 
   /// helper function to get a reference to
   /// the users collection of a certain experiment
-  CollectionReference<Map<String, dynamic>> _getUserCollectionRef(
-      String experimentDocId) {
+  CollectionReference<Map<String, dynamic>> _getUserCollectionRef(String experimentDocId) {
     return _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
@@ -23,8 +23,7 @@ class FirestoreUserRepository {
   }
 
   /// returns stream to a document with a specific share code
-  Stream<QuerySnapshot<Map<String, dynamic>>> getUserShareCodeStream(
-      String code) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getUserShareCodeStream(String code) {
     return _firestore
         .collection(userShareCodeCollectionName)
         .where('code', isEqualTo: code)
@@ -34,11 +33,8 @@ class FirestoreUserRepository {
 
   /// returns query of all users of a specific experiment
   Query<AppUser> getUsersQuery(String experimentDocId) {
-    return _getUserCollectionRef(experimentDocId)
-        .orderBy('createdOn')
-        .withConverter(
-          fromFirestore: (snapshot, _) =>
-              AppUser.fromFirestore(snapshot.data()!, snapshot.id),
+    return _getUserCollectionRef(experimentDocId).orderBy('createdOn').withConverter(
+          fromFirestore: (snapshot, _) => AppUser.fromFirestore(snapshot.data()!, snapshot.id),
           toFirestore: (user, _) => user.toFirestore(),
         );
   }
@@ -63,9 +59,8 @@ class FirestoreUserRepository {
         }
 
         // get all codes as list of strings
-        final codes = (docSnap.get('codes') as List<dynamic>)
-            .map((code) => code.toString())
-            .toList();
+        final codes =
+            (docSnap.get('codes') as List<dynamic>).map((code) => code.toString()).toList();
 
         // get first color code and remove from list
         final chosenColorCode = codes.first;
@@ -90,8 +85,7 @@ class FirestoreUserRepository {
   }) async {
     try {
       // reference to user sub-collection in specific experiment
-      final shareCollectionRef =
-          _firestore.collection(userShareCodeCollectionName);
+      final shareCollectionRef = _firestore.collection(userShareCodeCollectionName);
 
       String randomCode;
       while (true) {
@@ -99,10 +93,8 @@ class FirestoreUserRepository {
         randomCode = generateRandomCode(isUserCode: true);
 
         // exit if code does not already exist (for a user in this experiment)
-        final querySnap = await shareCollectionRef
-            .where('uid', isEqualTo: randomCode)
-            .limit(1)
-            .get();
+        final querySnap =
+            await shareCollectionRef.where('uid', isEqualTo: randomCode).limit(1).get();
         if (querySnap.docs.isEmpty) {
           break;
         }
@@ -173,32 +165,55 @@ class FirestoreUserRepository {
       // create updated user with table number null
       final updatedUser = user.copyWith(currentTableNumber: null);
       // update data in firestore
-      _getUserCollectionRef(experimentDocId)
-          .doc(updatedUser.uid)
-          .update(updatedUser.toFirestore());
+      _getUserCollectionRef(experimentDocId).doc(updatedUser.uid).update(updatedUser.toFirestore());
     }
   }
 
   // delete user entry in experiment and in root users collection
+  // also delete in parameters doc
   Future<void> deleteUser({
     required String experimentDocId,
     required AppUser user,
   }) async {
-    print('DELETING USER ${user.firstName} FROM EXPERIMENT: $experimentDocId');
-    // delete user from experiment
+    debugPrint('DELETING USER ${user.firstName} FROM EXPERIMENT: $experimentDocId');
+    final userUid = user.uid;
+
+    // 1. delete user from experiment
     await _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
         .collection(userCollectionName)
-        .doc(user.uid)
+        .doc(userUid)
         .delete();
 
-    // delete user from user collection
-    await _firestore.collection(userCollectionName).doc(user.uid).delete();
+    // 2. delete user from user collection
+    await _firestore.collection(userCollectionName).doc(userUid).delete();
+
+    // 3. remove user from list in parameter doc
+
+    // get parameter document reference and document snapshot
+    final parameterDocRef = _firestore
+        .collection(experimentCollectionName)
+        .doc(experimentDocId)
+        .collection(settingsCollectionName)
+        .doc(parameterDocName);
+
+    final parameterDocSnap = await parameterDocRef.get();
+
+    // get current parameters
+    final oldParameters = ScheduleParameters.fromJson(parameterDocSnap.data()!);
+
+    // get a copy of active user list and remove specific user from it
+    final activeUserSet = {...oldParameters.allActiveUsers};
+    activeUserSet.removeWhere((user) => user.uid == userUid);
+    // create updated parameter class
+    final updatedParameters = oldParameters.copyWith(allActiveUsers: activeUserSet);
+
+    // update firestore parameter document
+    parameterDocRef.update(updatedParameters.toJson());
   }
 }
 
-final firestoreUserRepositoryProvider =
-    Provider<FirestoreUserRepository>((ref) {
+final firestoreUserRepositoryProvider = Provider<FirestoreUserRepository>((ref) {
   return FirestoreUserRepository(ref.watch(firestoreInstanceProvider));
 });

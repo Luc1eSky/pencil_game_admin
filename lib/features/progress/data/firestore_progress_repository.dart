@@ -113,6 +113,7 @@ class FirestoreProgressRepository {
           debugPrint('Cannot start round. Wrong state.');
           return;
         }
+
         // update progress status to "roundPlaying"
         final updatedProgress =
             dbCurrentProgress.copyWith(status: ExperimentProgressStatus.roundPlaying);

@@ -1,5 +1,5 @@
 const appName = 'Pencil Game Admin Console';
-const bool inDebuggingMode = false; // use emulators or not
+const bool inDebuggingMode = true; // use emulators or not
 
 const appBarHeight = 60.0;
 const cardMaxWidth = 500.0;

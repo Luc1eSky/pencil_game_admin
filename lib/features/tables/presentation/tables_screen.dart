@@ -57,7 +57,7 @@ class TablesScreen extends ConsumerWidget {
 
                   List<RealtimeTable> tables;
                   // encode and decode json in case data is not cleanly delivered as
-                  // Map<String, dynamic> (e.g LinkedMap<Object?, Object?>)
+                  // Map<String, dynamic> (e.g LinkedHashMap<Object?, Object?>)
                   try {
                     // convert list of maps to list of realtime tables
                     tables = dataSnap!.children

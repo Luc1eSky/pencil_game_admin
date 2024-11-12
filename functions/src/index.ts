@@ -1,13 +1,19 @@
+// v1 needed for runWith()
+// make sure that package.json specifies the latest V1 version
+// such as "firebase-functions": "^3.14.1", NOT "firebase-functions": "^6.1.0"
+// also requires the matching "firebase-admin": "^11.0.0", NOT "firebase-admin": "^12.7.0",
 import * as admin from "firebase-admin"
 import * as logger from "firebase-functions/logger"
-import * as functions from "firebase-functions" // v1 needed for runWith(timeout)
+import * as functions from "firebase-functions"
 
 admin.initializeApp()
 
 // close a specific game (table in experiment) after a certain time
+// timeout value is only if function cannot be started
+// the specific delay value is given to the function as a parameter
 export const delayedClosingGame = functions.runWith({ timeoutSeconds: 200 }).https.onCall(
   async (data: any, context: functions.https.CallableContext)=> {
-    // Extract parameterss from the data object
+    // Extract parameters from the data object
     const experimentDocId = data.experimentDocId
     const tableNumber = data.tableNumber
     const waitTimeInSeconds = data.waitTimeInSeconds
@@ -36,6 +42,7 @@ export const delayedClosingGame = functions.runWith({ timeoutSeconds: 200 }).htt
 
 
 // set current round to status "roundFinished" if all tables have been finished
+// gets triggered every time any table status gets updated in the realtime database
 export const checkIfRoundWasFinished = functions.database.ref("{experimentDocId}/tables/{table}/status")
   .onUpdate(async (change, context)=> {
     // get experimentDocId and tableNumber
