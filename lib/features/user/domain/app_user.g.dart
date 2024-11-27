@@ -12,7 +12,12 @@ _$AppUserImpl _$$AppUserImplFromJson(Map<String, dynamic> json) =>
       uid: json['uid'] as String,
       colorCode: json['colorCode'] as String,
       experimentDocId: json['experimentDocId'] as String,
-      currentTableNumber: json['currentTableNumber'] as int?,
+      currentTableNumber: (json['currentTableNumber'] as num?)?.toInt(),
+      survey: json['survey'] == null
+          ? null
+          : Survey.fromJson(json['survey'] as Map<String, dynamic>),
+      surveySubmitted: json['surveySubmitted'] as bool? ?? false,
+      showSurvey: json['showSurvey'] as bool? ?? false,
       createdOn:
           const TimestampConverter().fromJson(json['createdOn'] as Timestamp),
     );
@@ -24,5 +29,8 @@ Map<String, dynamic> _$$AppUserImplToJson(_$AppUserImpl instance) =>
       'colorCode': instance.colorCode,
       'experimentDocId': instance.experimentDocId,
       'currentTableNumber': instance.currentTableNumber,
+      'survey': instance.survey?.toJson(),
+      'surveySubmitted': instance.surveySubmitted,
+      'showSurvey': instance.showSurvey,
       'createdOn': const TimestampConverter().toJson(instance.createdOn),
     };

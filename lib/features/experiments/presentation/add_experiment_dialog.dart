@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_admin/features/experiments/application/experiment_service.dart';
+import 'package:pencil_game_admin/features/experiments/domain/experiment.dart';
 import 'package:pencil_game_admin/style/color_palette.dart';
 
 import '../../authorize/data/firebase_auth_instance_provider.dart';
@@ -17,6 +18,7 @@ class AddExperimentDialog extends StatefulWidget {
 class _AddExperimentDialogState extends State<AddExperimentDialog> {
   final nameController = TextEditingController();
   final locationController = TextEditingController();
+  Treatment? selectedTreatment;
   bool buttonIsActive = true;
 
   @override
@@ -71,6 +73,33 @@ class _AddExperimentDialogState extends State<AddExperimentDialog> {
                 //icon: Icon(Icons.person),
               ),
             ),
+            DropdownButtonFormField<Treatment>(
+              value: selectedTreatment,
+              onChanged: (Treatment? newValue) {
+                setState(() {
+                  selectedTreatment = newValue;
+                });
+              },
+              validator: (value) {
+                if (value == null) {
+                  return 'Please select a treatment';
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                hintText: 'select a treatment',
+                labelText: 'Experiment Treatment',
+                //icon: Icon(Icons.person),
+              ),
+              items: Treatment.values.map((Treatment treatment) {
+                return DropdownMenuItem<Treatment>(
+                  value: treatment,
+                  child: Text(
+                    treatment.name,
+                  ),
+                );
+              }).toList(),
+            ),
             const SizedBox(height: 30),
           ],
         ),
@@ -97,10 +126,17 @@ class _AddExperimentDialogState extends State<AddExperimentDialog> {
                         final experimentName = nameController.text;
                         final experimentLocation = locationController.text;
                         try {
-                          await ref.read(experimentServiceProvider).addNewExperiment(
+                          await ref
+                              .read(experimentServiceProvider)
+                              .addNewExperiment(
                                 experimentName: experimentName,
                                 experimentLocation: experimentLocation,
-                                adminUid: ref.read(firebaseAuthInstanceProvider).currentUser!.uid,
+                                treatment: selectedTreatment!,
+                                adminUid: ref
+                                    .read(firebaseAuthInstanceProvider)
+                                    .currentUser!
+                                    .uid,
+                                showSurvey: false,
                               );
                         } catch (error) {
                           debugPrint(error.toString());

@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pencil_game_admin/features/schedule/application/schedule_service.dart';
-import 'package:pencil_game_admin/features/survey/data/firestore_survey_repository.dart';
 import 'package:pencil_game_admin/features/tables/application/copy_results_service.dart';
+import 'package:pencil_game_admin/features/user/data/firestore_user_repository.dart';
 
 import '../../progress/data/firestore_progress_repository.dart';
 import '../../progress/domain/experiment_progress.dart';
@@ -24,7 +24,9 @@ class TablesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<DocumentSnapshot<ExperimentProgress>>(
-      stream: ref.read(firestoreProgressRepositoryProvider).getProgressDocStream(experimentDocId),
+      stream: ref
+          .read(firestoreProgressRepositoryProvider)
+          .getProgressDocStream(experimentDocId),
       builder: (context, progressSnap) {
         if (progressSnap.hasError) {
           return Text('Snapshot error ${progressSnap.error.toString()}');
@@ -38,14 +40,19 @@ class TablesScreen extends ConsumerWidget {
         } catch (e) {
           return Text('Progress object error: $e');
         }
+        final isInLastRound =
+            progress.currentRoundNumber == progress.maximumRoundNumber;
+
         return !progress.showLiveView
             ? const SizedBox()
             : StreamBuilder(
-                stream:
-                    ref.read(realtimeDatabaseRepositoryProvider).getTablesStream(experimentDocId),
+                stream: ref
+                    .read(realtimeDatabaseRepositoryProvider)
+                    .getTablesStream(experimentDocId),
                 builder: (context, realtimeSnap) {
                   if (realtimeSnap.hasError) {
-                    return Text('Snapshot error ${realtimeSnap.error.toString()}');
+                    return Text(
+                        'Snapshot error ${realtimeSnap.error.toString()}');
                   }
                   if (!realtimeSnap.hasData) {
                     return const Center(child: CircularProgressIndicator());
@@ -61,11 +68,15 @@ class TablesScreen extends ConsumerWidget {
                   try {
                     // convert list of maps to list of realtime tables
                     tables = dataSnap!.children
-                        .map((t) => RealtimeTable.fromJson(jsonDecode(jsonEncode(t.value))))
+                        .map((t) => RealtimeTable.fromJson(
+                            jsonDecode(jsonEncode(t.value))))
                         .toList();
                   } catch (e) {
                     return Text('Realtime table object error: $e');
                   }
+
+                  final allTablesAreFinished = tables
+                      .every((table) => table.status == TableStatus.finished);
 
                   return Column(
                     children: [
@@ -80,15 +91,41 @@ class TablesScreen extends ConsumerWidget {
                                 style: const TextStyle(fontSize: 200),
                               ),
                             ),
-                            if (progress.status == ExperimentProgressStatus.roundFinished)
+                            // ElevatedButton(
+                            //   onPressed: () async {
+                            //     final nextRound = await ref
+                            //         .read(firestoreScheduleRepositoryProvider)
+                            //         .getSchedule(experimentDocId, 2);
+                            //     ref
+                            //         .read(firestoreUserRepositoryProvider)
+                            //         .changeCurrentTableNumbers(
+                            //           experimentDocId,
+                            //           nextRound,
+                            //         );
+                            //   },
+                            //   child: Text('TEST'),
+                            // ),
+                            if (progress.status ==
+                                    ExperimentProgressStatus.roundPlaying &&
+                                !isInLastRound &&
+                                allTablesAreFinished)
                               Padding(
                                 padding: const EdgeInsets.only(left: 20.0),
                                 child: ElevatedButton(
                                   onPressed: () async {
+                                    ref
+                                        .read(
+                                            firestoreProgressRepositoryProvider)
+                                        .changeStatus(
+                                            experimentDocId: experimentDocId,
+                                            newStatus: ExperimentProgressStatus
+                                                .roundFinished);
                                     print('end round');
                                     // copy results
                                     print('copy results');
-                                    await ref.read(copyResultsServiceProvider).copyResults(
+                                    await ref
+                                        .read(copyResultsServiceProvider)
+                                        .copyResults(
                                           experimentDocId: experimentDocId,
                                           tables: tables,
                                         );
@@ -96,33 +133,46 @@ class TablesScreen extends ConsumerWidget {
                                     print('move to next round');
                                     await ref
                                         .read(scheduleServiceProvider)
-                                        .moveToNextRound(experimentDocId: experimentDocId);
+                                        .moveToNextRound(
+                                            experimentDocId: experimentDocId);
+                                    ref
+                                        .read(
+                                            firestoreProgressRepositoryProvider)
+                                        .changeStatus(
+                                            experimentDocId: experimentDocId,
+                                            newStatus: ExperimentProgressStatus
+                                                .roundPlaying);
                                   },
                                   child: const Text('Next Round'),
                                 ),
                               ),
-                            if (progress.status == ExperimentProgressStatus.experimentFinished)
+                            if (progress.status ==
+                                    ExperimentProgressStatus.roundPlaying &&
+                                isInLastRound &&
+                                allTablesAreFinished)
                               Padding(
                                 padding: const EdgeInsets.only(left: 20.0),
                                 child: ElevatedButton(
                                   onPressed: () async {
                                     // copy results
-                                    await ref.read(copyResultsServiceProvider).copyResults(
+                                    await ref
+                                        .read(copyResultsServiceProvider)
+                                        .copyResults(
                                           experimentDocId: experimentDocId,
                                           tables: tables,
                                         );
-                                    // set progress to "surveyLinkDisplayed"
-                                    await ref
-                                        .read(firestoreProgressRepositoryProvider)
-                                        .changeStatus(
-                                          experimentDocId: experimentDocId,
-                                          newStatus: ExperimentProgressStatus.surveyLinkDisplayed,
-                                        );
 
-                                    // update survey doc to show survey to users
                                     await ref
-                                        .read(firestoreSurveyRepositoryProvider)
-                                        .activateSurvey(experimentDocId: experimentDocId);
+                                        .read(firestoreUserRepositoryProvider)
+                                        .activateSurveyInUserDocs(
+                                            experimentDocId);
+                                    await ref
+                                        .read(
+                                            firestoreProgressRepositoryProvider)
+                                        .changeStatus(
+                                            experimentDocId: experimentDocId,
+                                            newStatus: ExperimentProgressStatus
+                                                .displaySurvey);
                                   },
                                   child: const Text('Finish Experiment'),
                                 ),
@@ -143,7 +193,8 @@ class TablesScreen extends ConsumerWidget {
                                 progress: progress,
                               );
                             },
-                            separatorBuilder: (context, index) => const SizedBox(height: 20),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 20),
                           ),
                         ),
                       ),

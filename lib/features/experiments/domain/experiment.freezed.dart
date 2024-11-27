@@ -26,9 +26,15 @@ mixin _$Experiment {
   @TimestampConverter()
   DateTime get createdOn => throw _privateConstructorUsedError;
   ExperimentStatus get status => throw _privateConstructorUsedError;
+  bool get showSurvey => throw _privateConstructorUsedError;
+  Treatment get treatment => throw _privateConstructorUsedError;
 
+  /// Serializes this Experiment to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of Experiment
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ExperimentCopyWith<Experiment> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -44,7 +50,9 @@ abstract class $ExperimentCopyWith<$Res> {
       String location,
       String createdByUid,
       @TimestampConverter() DateTime createdOn,
-      ExperimentStatus status});
+      ExperimentStatus status,
+      bool showSurvey,
+      Treatment treatment});
 }
 
 /// @nodoc
@@ -57,6 +65,8 @@ class _$ExperimentCopyWithImpl<$Res, $Val extends Experiment>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Experiment
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -65,6 +75,8 @@ class _$ExperimentCopyWithImpl<$Res, $Val extends Experiment>
     Object? createdByUid = null,
     Object? createdOn = null,
     Object? status = null,
+    Object? showSurvey = null,
+    Object? treatment = null,
   }) {
     return _then(_value.copyWith(
       name: null == name
@@ -87,6 +99,14 @@ class _$ExperimentCopyWithImpl<$Res, $Val extends Experiment>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as ExperimentStatus,
+      showSurvey: null == showSurvey
+          ? _value.showSurvey
+          : showSurvey // ignore: cast_nullable_to_non_nullable
+              as bool,
+      treatment: null == treatment
+          ? _value.treatment
+          : treatment // ignore: cast_nullable_to_non_nullable
+              as Treatment,
     ) as $Val);
   }
 }
@@ -104,7 +124,9 @@ abstract class _$$ExperimentImplCopyWith<$Res>
       String location,
       String createdByUid,
       @TimestampConverter() DateTime createdOn,
-      ExperimentStatus status});
+      ExperimentStatus status,
+      bool showSurvey,
+      Treatment treatment});
 }
 
 /// @nodoc
@@ -115,6 +137,8 @@ class __$$ExperimentImplCopyWithImpl<$Res>
       _$ExperimentImpl _value, $Res Function(_$ExperimentImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of Experiment
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -123,6 +147,8 @@ class __$$ExperimentImplCopyWithImpl<$Res>
     Object? createdByUid = null,
     Object? createdOn = null,
     Object? status = null,
+    Object? showSurvey = null,
+    Object? treatment = null,
   }) {
     return _then(_$ExperimentImpl(
       name: null == name
@@ -145,6 +171,14 @@ class __$$ExperimentImplCopyWithImpl<$Res>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as ExperimentStatus,
+      showSurvey: null == showSurvey
+          ? _value.showSurvey
+          : showSurvey // ignore: cast_nullable_to_non_nullable
+              as bool,
+      treatment: null == treatment
+          ? _value.treatment
+          : treatment // ignore: cast_nullable_to_non_nullable
+              as Treatment,
     ));
   }
 }
@@ -157,7 +191,9 @@ class _$ExperimentImpl extends _Experiment {
       required this.location,
       required this.createdByUid,
       @TimestampConverter() required this.createdOn,
-      required this.status})
+      required this.status,
+      required this.showSurvey,
+      required this.treatment})
       : super._();
 
   factory _$ExperimentImpl.fromJson(Map<String, dynamic> json) =>
@@ -174,10 +210,14 @@ class _$ExperimentImpl extends _Experiment {
   final DateTime createdOn;
   @override
   final ExperimentStatus status;
+  @override
+  final bool showSurvey;
+  @override
+  final Treatment treatment;
 
   @override
   String toString() {
-    return 'Experiment(name: $name, location: $location, createdByUid: $createdByUid, createdOn: $createdOn, status: $status)';
+    return 'Experiment(name: $name, location: $location, createdByUid: $createdByUid, createdOn: $createdOn, status: $status, showSurvey: $showSurvey, treatment: $treatment)';
   }
 
   @override
@@ -192,15 +232,21 @@ class _$ExperimentImpl extends _Experiment {
                 other.createdByUid == createdByUid) &&
             (identical(other.createdOn, createdOn) ||
                 other.createdOn == createdOn) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.showSurvey, showSurvey) ||
+                other.showSurvey == showSurvey) &&
+            (identical(other.treatment, treatment) ||
+                other.treatment == treatment));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, name, location, createdByUid, createdOn, status);
+  int get hashCode => Object.hash(runtimeType, name, location, createdByUid,
+      createdOn, status, showSurvey, treatment);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Experiment
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ExperimentImplCopyWith<_$ExperimentImpl> get copyWith =>
@@ -220,7 +266,9 @@ abstract class _Experiment extends Experiment {
       required final String location,
       required final String createdByUid,
       @TimestampConverter() required final DateTime createdOn,
-      required final ExperimentStatus status}) = _$ExperimentImpl;
+      required final ExperimentStatus status,
+      required final bool showSurvey,
+      required final Treatment treatment}) = _$ExperimentImpl;
   const _Experiment._() : super._();
 
   factory _Experiment.fromJson(Map<String, dynamic> json) =
@@ -238,7 +286,14 @@ abstract class _Experiment extends Experiment {
   @override
   ExperimentStatus get status;
   @override
-  @JsonKey(ignore: true)
+  bool get showSurvey;
+  @override
+  Treatment get treatment;
+
+  /// Create a copy of Experiment
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ExperimentImplCopyWith<_$ExperimentImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

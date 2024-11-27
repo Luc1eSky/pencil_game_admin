@@ -12,8 +12,12 @@ class FirestoreExperimentRepository {
   final FirebaseFirestore _firestore;
 
   /// get stream to a specific experiment document
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getExperimentStream(String docId) {
-    return _firestore.collection(experimentCollectionName).doc(docId).snapshots();
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getExperimentStream(
+      String docId) {
+    return _firestore
+        .collection(experimentCollectionName)
+        .doc(docId)
+        .snapshots();
   }
 
   /// Creates a new experiment based on the user's input and stores it in firestore
@@ -21,9 +25,12 @@ class FirestoreExperimentRepository {
     required String experimentName,
     required String experimentLocation,
     required String adminUid,
+    required Treatment treatment,
+    required bool showSurvey,
   }) async {
     // get new experiment doc id (auto generated)
-    final newExperimentDocRef = _firestore.collection(experimentCollectionName).doc();
+    final newExperimentDocRef =
+        _firestore.collection(experimentCollectionName).doc();
     final newDocumentId = newExperimentDocRef.id;
 
     // create new experiment object and convert it to a JSON map
@@ -33,6 +40,8 @@ class FirestoreExperimentRepository {
       createdByUid: adminUid,
       createdOn: DateTime.now(),
       status: ExperimentStatus.scheduled,
+      treatment: treatment,
+      showSurvey: false,
     ).toJson();
 
     // add a new document for the experiment
@@ -89,7 +98,8 @@ class FirestoreExperimentRepository {
   }
 
   /// add share code document to shareCodes collection
-  Future<void> _addShareCode({required String code, required String docId}) async {
+  Future<void> _addShareCode(
+      {required String code, required String docId}) async {
     await _firestore.collection(adminShareCodeCollectionName).add({
       'code': code,
       'experimentDocId': docId,
@@ -98,7 +108,8 @@ class FirestoreExperimentRepository {
   }
 
   /// try to join an experiment as an admin via a share code
-  Future<JoinStatus> tryToJoinExperiment({required String code, required String? uid}) async {
+  Future<JoinStatus> tryToJoinExperiment(
+      {required String code, required String? uid}) async {
     // get query of share code doc with specific share code
     final codeQuerySnap = await _firestore
         .collection(adminShareCodeCollectionName)
@@ -107,7 +118,8 @@ class FirestoreExperimentRepository {
         .get();
 
     // get admin doc snap for specific admin UID
-    final adminDocSnap = await _firestore.collection(adminsCollectionName).doc(uid).get();
+    final adminDocSnap =
+        await _firestore.collection(adminsCollectionName).doc(uid).get();
 
     // check if document snapshots exist and and uid is not null
     if (codeQuerySnap.docs.isEmpty ||
@@ -135,7 +147,9 @@ class FirestoreExperimentRepository {
 
     // get list of experiment doc IDs of current user as list of strings
     final listOfExperimentDocIds =
-        (adminData[experimentsListName] as List<dynamic>).map((e) => e.toString()).toList();
+        (adminData[experimentsListName] as List<dynamic>)
+            .map((e) => e.toString())
+            .toList();
 
     // exit if user was already admin
     if (listOfExperimentDocIds.contains(experimentDocId)) {
@@ -152,7 +166,10 @@ class FirestoreExperimentRepository {
 
       // add admin uid to experiment doc
       FieldPath adminsListPath = FieldPath(const [sharedAdminListName]);
-      await _firestore.collection(experimentCollectionName).doc(experimentDocId).update({
+      await _firestore
+          .collection(experimentCollectionName)
+          .doc(experimentDocId)
+          .update({
         adminsListPath: FieldValue.arrayUnion([uid])
       });
 
@@ -163,7 +180,8 @@ class FirestoreExperimentRepository {
   }
 }
 
-final firestoreExperimentRepositoryProvider = Provider<FirestoreExperimentRepository>((ref) {
+final firestoreExperimentRepositoryProvider =
+    Provider<FirestoreExperimentRepository>((ref) {
   return FirestoreExperimentRepository(ref.watch(firestoreInstanceProvider));
 });
 

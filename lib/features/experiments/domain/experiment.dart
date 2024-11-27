@@ -7,6 +7,10 @@ import 'experiment_status.dart';
 part 'experiment.freezed.dart';
 part 'experiment.g.dart';
 
+/// Enum for treatment
+@JsonEnum(alwaysCreate: true)
+enum Treatment { faceToface, blind, talk }
+
 @freezed
 class Experiment with _$Experiment {
   const Experiment._();
@@ -16,12 +20,15 @@ class Experiment with _$Experiment {
     required String createdByUid,
     @TimestampConverter() required DateTime createdOn,
     required ExperimentStatus status,
+    required bool showSurvey,
+    required Treatment treatment,
     // required int userCount,
     // required int tableCount,
     // required int numberOfRounds,
   }) = _Experiment;
 
-  factory Experiment.fromJson(Map<String, dynamic> json) => _$ExperimentFromJson(json);
+  factory Experiment.fromJson(Map<String, dynamic> json) =>
+      _$ExperimentFromJson(json);
 
   bool userIsOwner(String? uid) {
     return createdByUid == uid;

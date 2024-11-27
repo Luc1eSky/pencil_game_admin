@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pencil_game_admin/features/experiments/domain/experiment.dart';
 import 'package:pencil_game_admin/features/survey/data/firestore_survey_repository.dart';
 
 import '../../admin/data/firestore_admin_repository.dart';
@@ -28,14 +29,18 @@ class ExperimentService {
   Future<void> addNewExperiment({
     required String experimentName,
     required String experimentLocation,
+    required Treatment treatment,
     required String adminUid,
+    required bool showSurvey,
   }) async {
     // add new experiment document
-    final experimentDocId = await firestoreExperimentRepository.addExperimentDoc(
-      experimentName: experimentName,
-      experimentLocation: experimentLocation,
-      adminUid: adminUid,
-    );
+    final experimentDocId =
+        await firestoreExperimentRepository.addExperimentDoc(
+            experimentName: experimentName,
+            experimentLocation: experimentLocation,
+            adminUid: adminUid,
+            treatment: treatment,
+            showSurvey: false);
 
     // add reference to newly created experiment to admin doc
     await firestoreAdminRepository.addExperimentToAdmin(
@@ -61,19 +66,20 @@ class ExperimentService {
     firestoreProgressRepository.addProgressDoc(experimentDocId);
 
     // add survey document
-    //TODO: REPLACE HARDCODED LINK
-    firestoreSurveyRepository.addSurveyToExperiment(
-      experimentDocId: experimentDocId,
-      surveyLink: 'https://qualtricsxmbbg76g22x.qualtrics.com/jfe/form/SV_09ydhOQ6NeOsBcG',
-    );
+    // //TODO: REPLACE HARDCODED LINK
+    // firestoreSurveyRepository.addSurveyStatusToExperiment(
+    //   experimentDocId: experimentDocId,
+    // );
   }
 }
 
 final experimentServiceProvider = Provider<ExperimentService>((ref) {
   return ExperimentService(
-    firestoreExperimentRepository: ref.watch(firestoreExperimentRepositoryProvider),
+    firestoreExperimentRepository:
+        ref.watch(firestoreExperimentRepositoryProvider),
     firestoreAdminRepository: ref.watch(firestoreAdminRepositoryProvider),
-    firestoreColorCodesRepository: ref.watch(firestoreColorCodesRepositoryProvider),
+    firestoreColorCodesRepository:
+        ref.watch(firestoreColorCodesRepositoryProvider),
     firestoreScheduleRepository: ref.watch(firestoreScheduleRepositoryProvider),
     firestoreProgressRepository: ref.watch(firestoreProgressRepositoryProvider),
     firestoreSurveyRepository: ref.watch(firestoreSurveyRepositoryProvider),

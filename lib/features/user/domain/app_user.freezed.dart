@@ -25,11 +25,18 @@ mixin _$AppUser {
   String get colorCode => throw _privateConstructorUsedError;
   String get experimentDocId => throw _privateConstructorUsedError;
   int? get currentTableNumber => throw _privateConstructorUsedError;
+  Survey? get survey => throw _privateConstructorUsedError;
+  bool get surveySubmitted => throw _privateConstructorUsedError;
+  bool get showSurvey => throw _privateConstructorUsedError;
   @TimestampConverter()
   DateTime get createdOn => throw _privateConstructorUsedError;
 
+  /// Serializes this AppUser to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of AppUser
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $AppUserCopyWith<AppUser> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -44,7 +51,12 @@ abstract class $AppUserCopyWith<$Res> {
       String colorCode,
       String experimentDocId,
       int? currentTableNumber,
+      Survey? survey,
+      bool surveySubmitted,
+      bool showSurvey,
       @TimestampConverter() DateTime createdOn});
+
+  $SurveyCopyWith<$Res>? get survey;
 }
 
 /// @nodoc
@@ -57,6 +69,8 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of AppUser
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -65,6 +79,9 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
     Object? colorCode = null,
     Object? experimentDocId = null,
     Object? currentTableNumber = freezed,
+    Object? survey = freezed,
+    Object? surveySubmitted = null,
+    Object? showSurvey = null,
     Object? createdOn = null,
   }) {
     return _then(_value.copyWith(
@@ -88,11 +105,37 @@ class _$AppUserCopyWithImpl<$Res, $Val extends AppUser>
           ? _value.currentTableNumber
           : currentTableNumber // ignore: cast_nullable_to_non_nullable
               as int?,
+      survey: freezed == survey
+          ? _value.survey
+          : survey // ignore: cast_nullable_to_non_nullable
+              as Survey?,
+      surveySubmitted: null == surveySubmitted
+          ? _value.surveySubmitted
+          : surveySubmitted // ignore: cast_nullable_to_non_nullable
+              as bool,
+      showSurvey: null == showSurvey
+          ? _value.showSurvey
+          : showSurvey // ignore: cast_nullable_to_non_nullable
+              as bool,
       createdOn: null == createdOn
           ? _value.createdOn
           : createdOn // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ) as $Val);
+  }
+
+  /// Create a copy of AppUser
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $SurveyCopyWith<$Res>? get survey {
+    if (_value.survey == null) {
+      return null;
+    }
+
+    return $SurveyCopyWith<$Res>(_value.survey!, (value) {
+      return _then(_value.copyWith(survey: value) as $Val);
+    });
   }
 }
 
@@ -109,7 +152,13 @@ abstract class _$$AppUserImplCopyWith<$Res> implements $AppUserCopyWith<$Res> {
       String colorCode,
       String experimentDocId,
       int? currentTableNumber,
+      Survey? survey,
+      bool surveySubmitted,
+      bool showSurvey,
       @TimestampConverter() DateTime createdOn});
+
+  @override
+  $SurveyCopyWith<$Res>? get survey;
 }
 
 /// @nodoc
@@ -120,6 +169,8 @@ class __$$AppUserImplCopyWithImpl<$Res>
       _$AppUserImpl _value, $Res Function(_$AppUserImpl) _then)
       : super(_value, _then);
 
+  /// Create a copy of AppUser
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -128,6 +179,9 @@ class __$$AppUserImplCopyWithImpl<$Res>
     Object? colorCode = null,
     Object? experimentDocId = null,
     Object? currentTableNumber = freezed,
+    Object? survey = freezed,
+    Object? surveySubmitted = null,
+    Object? showSurvey = null,
     Object? createdOn = null,
   }) {
     return _then(_$AppUserImpl(
@@ -151,6 +205,18 @@ class __$$AppUserImplCopyWithImpl<$Res>
           ? _value.currentTableNumber
           : currentTableNumber // ignore: cast_nullable_to_non_nullable
               as int?,
+      survey: freezed == survey
+          ? _value.survey
+          : survey // ignore: cast_nullable_to_non_nullable
+              as Survey?,
+      surveySubmitted: null == surveySubmitted
+          ? _value.surveySubmitted
+          : surveySubmitted // ignore: cast_nullable_to_non_nullable
+              as bool,
+      showSurvey: null == showSurvey
+          ? _value.showSurvey
+          : showSurvey // ignore: cast_nullable_to_non_nullable
+              as bool,
       createdOn: null == createdOn
           ? _value.createdOn
           : createdOn // ignore: cast_nullable_to_non_nullable
@@ -168,6 +234,9 @@ class _$AppUserImpl extends _AppUser {
       required this.colorCode,
       required this.experimentDocId,
       required this.currentTableNumber,
+      required this.survey,
+      this.surveySubmitted = false,
+      this.showSurvey = false,
       @TimestampConverter() required this.createdOn})
       : super._();
 
@@ -185,15 +254,25 @@ class _$AppUserImpl extends _AppUser {
   @override
   final int? currentTableNumber;
   @override
+  final Survey? survey;
+  @override
+  @JsonKey()
+  final bool surveySubmitted;
+  @override
+  @JsonKey()
+  final bool showSurvey;
+  @override
   @TimestampConverter()
   final DateTime createdOn;
 
   @override
   String toString() {
-    return 'AppUser(firstName: $firstName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, currentTableNumber: $currentTableNumber, createdOn: $createdOn)';
+    return 'AppUser(firstName: $firstName, uid: $uid, colorCode: $colorCode, experimentDocId: $experimentDocId, currentTableNumber: $currentTableNumber, survey: $survey, surveySubmitted: $surveySubmitted, showSurvey: $showSurvey, createdOn: $createdOn)';
   }
 
-  @JsonKey(ignore: true)
+  /// Create a copy of AppUser
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$AppUserImplCopyWith<_$AppUserImpl> get copyWith =>
@@ -214,6 +293,9 @@ abstract class _AppUser extends AppUser {
       required final String colorCode,
       required final String experimentDocId,
       required final int? currentTableNumber,
+      required final Survey? survey,
+      final bool surveySubmitted,
+      final bool showSurvey,
       @TimestampConverter() required final DateTime createdOn}) = _$AppUserImpl;
   const _AppUser._() : super._();
 
@@ -230,10 +312,19 @@ abstract class _AppUser extends AppUser {
   @override
   int? get currentTableNumber;
   @override
+  Survey? get survey;
+  @override
+  bool get surveySubmitted;
+  @override
+  bool get showSurvey;
+  @override
   @TimestampConverter()
   DateTime get createdOn;
+
+  /// Create a copy of AppUser
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AppUserImplCopyWith<_$AppUserImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

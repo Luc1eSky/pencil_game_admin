@@ -62,7 +62,7 @@ class ScheduleService {
       );
 
       // reset current table number of all users (set to null)
-      firestoreUserRepository.resetTableNumber(experimentDocId);
+      await firestoreUserRepository.resetTableNumber(experimentDocId);
     }
     // if currently scheduled, change status to "lockedSchedule"
     else if (status == ExperimentProgressStatus.scheduled) {
@@ -72,10 +72,12 @@ class ScheduleService {
       );
 
       // read first round of schedule
-      final firstRound = await firestoreScheduleRepository.getSchedule(experimentDocId, 1);
+      final firstRound =
+          await firestoreScheduleRepository.getSchedule(experimentDocId, 1);
 
       // get maximum round number from schedule
-      final maxRoundNumber = await firestoreScheduleRepository.getMaxRoundNumber(experimentDocId);
+      final maxRoundNumber =
+          await firestoreScheduleRepository.getMaxRoundNumber(experimentDocId);
 
       // update maximum round number in progress
       await firestoreProgressRepository.updateMaxRoundNumber(
@@ -84,7 +86,7 @@ class ScheduleService {
       );
 
       // create tables in realtime database
-      realtimeDatabaseRepository.addTablesToDatabase(
+      await realtimeDatabaseRepository.addTablesToDatabase(
         experimentDocId: experimentDocId,
         round: firstRound,
       );
@@ -101,11 +103,9 @@ class ScheduleService {
   Future<void> moveToNextRound({
     required String experimentDocId,
   }) async {
-    print('move to next round');
-
     // increase round number if not already at max
-    final nextRoundNumber =
-        await firestoreProgressRepository.goToNextRound(experimentDocId: experimentDocId);
+    final nextRoundNumber = await firestoreProgressRepository.goToNextRound(
+        experimentDocId: experimentDocId);
 
     // exit if the round number could not increase
     if (nextRoundNumber == null) {
@@ -113,20 +113,20 @@ class ScheduleService {
     }
 
     // reset current table number of all users (set to null)
-    firestoreUserRepository.resetTableNumber(experimentDocId);
+    await firestoreUserRepository.resetTableNumber(experimentDocId);
 
     // get next round data
-    final nextRound =
-        await firestoreScheduleRepository.getSchedule(experimentDocId, nextRoundNumber);
+    final nextRound = await firestoreScheduleRepository.getSchedule(
+        experimentDocId, nextRoundNumber);
 
     // create tables in realtime database
-    realtimeDatabaseRepository.addTablesToDatabase(
+    await realtimeDatabaseRepository.addTablesToDatabase(
       experimentDocId: experimentDocId,
       round: nextRound,
     );
 
     // change current table number of all users
-    firestoreUserRepository.changeCurrentTableNumbers(
+    await firestoreUserRepository.changeCurrentTableNumbers(
       experimentDocId,
       nextRound,
     );

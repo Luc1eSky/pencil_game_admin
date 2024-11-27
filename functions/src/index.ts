@@ -113,7 +113,7 @@ export const checkIfRoundWasFinished = functions.database.ref("{experimentDocId}
 
           // exit if any fields do not exist
           if (currentRoundNumber === undefined || maximumRoundNumber === undefined) {
-            logger.error(`Could not find progress fields. currentRoundNumber: ${currentRoundNumber}, 
+            logger.error(`Could not find progress fields. currentRoundNumber: ${currentRoundNumber},
             maximumRoundNumber: ${maximumRoundNumber}`)
             return {"error": "Could not find progress fields."}
           }

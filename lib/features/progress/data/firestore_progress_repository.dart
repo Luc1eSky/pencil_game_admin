@@ -11,7 +11,8 @@ class FirestoreProgressRepository {
   final FirebaseFirestore _firestore;
 
   /// local helper function to get document reference
-  DocumentReference<Map<String, dynamic>> _getProgressDocRef(String experimentDocId) {
+  DocumentReference<Map<String, dynamic>> _getProgressDocRef(
+      String experimentDocId) {
     return _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
@@ -20,7 +21,8 @@ class FirestoreProgressRepository {
   }
 
   /// stream progress document for a specific experiment
-  Stream<DocumentSnapshot<ExperimentProgress>> getProgressDocStream(String experimentDocId) {
+  Stream<DocumentSnapshot<ExperimentProgress>> getProgressDocStream(
+      String experimentDocId) {
     return _getProgressDocRef(experimentDocId)
         .withConverter(
           fromFirestore: (snapshot, _) {
@@ -79,7 +81,8 @@ class FirestoreProgressRepository {
       final docSnap = await _getProgressDocRef(experimentDocId).get();
       final currentProgress = ExperimentProgress.fromJson(docSnap.data()!);
 
-      final updatedProgress = currentProgress.copyWith(maximumRoundNumber: maxRoundNumber);
+      final updatedProgress =
+          currentProgress.copyWith(maximumRoundNumber: maxRoundNumber);
       docSnap.reference.update(updatedProgress.toJson());
     } catch (e) {
       throw Exception("Error. Could not update maximum round number.\n$e");
@@ -115,8 +118,8 @@ class FirestoreProgressRepository {
         }
 
         // update progress status to "roundPlaying"
-        final updatedProgress =
-            dbCurrentProgress.copyWith(status: ExperimentProgressStatus.roundPlaying);
+        final updatedProgress = dbCurrentProgress.copyWith(
+            status: ExperimentProgressStatus.roundPlaying);
         transaction.update(docRef, updatedProgress.toJson());
       } catch (e) {
         debugPrint(e.toString());
@@ -129,7 +132,7 @@ class FirestoreProgressRepository {
   Future<int?> goToNextRound({
     required String experimentDocId,
   }) async {
-    // reference to color code sub-collection in specific experiment
+    // reference to progress doc in specific experiment
     final progressDocRef = _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
@@ -167,6 +170,7 @@ class FirestoreProgressRepository {
   }
 }
 
-final firestoreProgressRepositoryProvider = Provider<FirestoreProgressRepository>((ref) {
+final firestoreProgressRepositoryProvider =
+    Provider<FirestoreProgressRepository>((ref) {
   return FirestoreProgressRepository(ref.watch(firestoreInstanceProvider));
 });

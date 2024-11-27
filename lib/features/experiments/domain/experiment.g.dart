@@ -14,6 +14,8 @@ _$ExperimentImpl _$$ExperimentImplFromJson(Map<String, dynamic> json) =>
       createdOn:
           const TimestampConverter().fromJson(json['createdOn'] as Timestamp),
       status: $enumDecode(_$ExperimentStatusEnumMap, json['status']),
+      showSurvey: json['showSurvey'] as bool,
+      treatment: $enumDecode(_$TreatmentEnumMap, json['treatment']),
     );
 
 Map<String, dynamic> _$$ExperimentImplToJson(_$ExperimentImpl instance) =>
@@ -23,6 +25,8 @@ Map<String, dynamic> _$$ExperimentImplToJson(_$ExperimentImpl instance) =>
       'createdByUid': instance.createdByUid,
       'createdOn': const TimestampConverter().toJson(instance.createdOn),
       'status': _$ExperimentStatusEnumMap[instance.status]!,
+      'showSurvey': instance.showSurvey,
+      'treatment': _$TreatmentEnumMap[instance.treatment]!,
     };
 
 const _$ExperimentStatusEnumMap = {
@@ -30,4 +34,10 @@ const _$ExperimentStatusEnumMap = {
   ExperimentStatus.started: 'started',
   ExperimentStatus.deleted: 'deleted',
   ExperimentStatus.completed: 'completed',
+};
+
+const _$TreatmentEnumMap = {
+  Treatment.faceToface: 'faceToface',
+  Treatment.blind: 'blind',
+  Treatment.talk: 'talk',
 };

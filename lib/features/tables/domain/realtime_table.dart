@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../utils/utils.dart';
+import '../../user/domain/app_user.dart';
 import '../../user/domain/simple_user.dart';
 import 'click.dart';
 import 'number_copy_result.dart';
@@ -26,11 +27,14 @@ class RealtimeTable with _$RealtimeTable {
     List<NumberCopyResult>? numberCopyResults,
   }) = _RealtimeTable;
 
-  factory RealtimeTable.fromJson(Map<String, dynamic> json) => _$RealtimeTableFromJson(json);
+  factory RealtimeTable.fromJson(Map<String, dynamic> json) =>
+      _$RealtimeTableFromJson(json);
 
   // needed to show who is at the table already
-  bool get firstUserIsPresent => usersAtTable?.contains(assignedUsers.elementAt(0)) ?? false;
-  bool get secondUserIsPresent => usersAtTable?.contains(assignedUsers.elementAt(1)) ?? false;
+  bool get firstUserIsPresent =>
+      usersAtTable?.contains(assignedUsers.elementAt(0)) ?? false;
+  bool get secondUserIsPresent =>
+      usersAtTable?.contains(assignedUsers.elementAt(1)) ?? false;
   // flag that signals if table is ready
   bool get hasCorrectUsers => setEquals(assignedUsers, usersAtTable);
 

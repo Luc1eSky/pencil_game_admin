@@ -36,7 +36,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       bool isTable = true,
     }) {
       // return function that modifies firestore data
-      return ref.read(firestoreScheduleRepositoryProvider).getCountChangeFunction(
+      return ref
+          .read(firestoreScheduleRepositoryProvider)
+          .getCountChangeFunction(
             experimentDocId,
             subtract: subtract,
             isTable: isTable,
@@ -44,8 +46,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     }
 
     return StreamBuilder(
-      stream:
-          ref.read(firestoreScheduleRepositoryProvider).getParameterStream(widget.experimentDocId),
+      stream: ref
+          .read(firestoreScheduleRepositoryProvider)
+          .getParameterStream(widget.experimentDocId),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Text('Snapshot error ${snapshot.error.toString()}');
@@ -88,7 +91,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
               return Text('Progress conversion error: $e');
             }
             //return Container();
-            final buttonsAreActive = !isCalculating && progress.canCreateSchedule;
+            final buttonsAreActive =
+                !isCalculating && progress.canCreateSchedule;
 
             return Column(
               children: [
@@ -115,7 +119,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                           child: CountIncrementer(
                             isActive: buttonsAreActive,
                             count: tableCount,
-                            subtract: getCountChangeMethod(widget.experimentDocId, subtract: true),
+                            subtract: getCountChangeMethod(
+                                widget.experimentDocId,
+                                subtract: true),
                             add: getCountChangeMethod(widget.experimentDocId),
                           ),
                         ),
@@ -127,9 +133,12 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                           child: CountIncrementer(
                             isActive: buttonsAreActive,
                             count: numberOfRounds,
-                            subtract: getCountChangeMethod(widget.experimentDocId,
-                                subtract: true, isTable: false),
-                            add: getCountChangeMethod(widget.experimentDocId, isTable: false),
+                            subtract: getCountChangeMethod(
+                                widget.experimentDocId,
+                                subtract: true,
+                                isTable: false),
+                            add: getCountChangeMethod(widget.experimentDocId,
+                                isTable: false),
                           ),
                         ),
                       ),
@@ -153,13 +162,16 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                 try {
                                   await ref
                                       .read(scheduleServiceProvider)
-                                      .createSchedule(experimentDocId: widget.experimentDocId);
+                                      .createSchedule(
+                                          experimentDocId:
+                                              widget.experimentDocId);
                                 } catch (error) {
                                   print(error);
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        backgroundColor: ColorPalette().snackBarError,
+                                        backgroundColor:
+                                            ColorPalette().snackBarError,
                                         content: Text(error.toString()),
                                       ),
                                     );
@@ -174,7 +186,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                       ),
                     ),
                     LockScheduleSwitch(experimentDocId: widget.experimentDocId),
-                    if (progress.status == ExperimentProgressStatus.surveyLinkDisplayed)
+                    if (progress.status ==
+                        ExperimentProgressStatus.displaySurvey)
                       ElevatedButton(
                         onPressed: isExporting
                             ? null
@@ -185,7 +198,9 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
                                 await ref
                                     .read(firestoreResultsRepositoryProvider)
-                                    .exportToExcel(experimentDocId: widget.experimentDocId);
+                                    .exportToExcel(
+                                        experimentDocId:
+                                            widget.experimentDocId);
                                 setState(() {
                                   isExporting = false;
                                 });
@@ -201,7 +216,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                         .getScheduleStream(widget.experimentDocId),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return Text('Snapshot error ${snapshot.error.toString()}');
+                        return Text(
+                            'Snapshot error ${snapshot.error.toString()}');
                       }
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
@@ -221,7 +237,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                         return Container();
                       }
 
-                      int playersPausingEachRound = rounds.first.pausingUsers.length;
+                      int playersPausingEachRound =
+                          rounds.first.pausingUsers.length;
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: Column(
@@ -240,19 +257,24 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                 itemBuilder: (context, index) {
                                   final round = rounds[index];
                                   final listOfTableTexts = round.games.map((g) {
-                                    final colorPairString =
-                                        g.assignedUsers.map((p) => p.colorCode).join(' - ');
+                                    final colorPairString = g.assignedUsers
+                                        .map((p) => p.colorCode)
+                                        .join(' - ');
                                     return Text(
                                       'Table ${g.tableNumber}: $colorPairString',
                                       style: const TextStyle(fontSize: 16),
                                     );
                                   }).toList();
-                                  final pausingPlayersString =
-                                      round.pausingUsers.map((p) => p.colorCode).toSet().join(', ');
+                                  final pausingPlayersString = round
+                                      .pausingUsers
+                                      .map((p) => p.colorCode)
+                                      .toSet()
+                                      .join(', ');
                                   return Card(
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15.0),
-                                      side: progress.currentRoundNumber == round.roundNumber
+                                      side: progress.currentRoundNumber ==
+                                              round.roundNumber
                                           ? const BorderSide(
                                               color: Colors.black,
                                               width: 2.0,
@@ -261,7 +283,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                     ),
                                     child: ListTile(
                                       contentPadding:
-                                          const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                                          const EdgeInsets.symmetric(
+                                              vertical: 10, horizontal: 25),
                                       titleTextStyle: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
@@ -272,10 +295,12 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                         child: FractionallySizedBox(
                                           widthFactor: 0.72,
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               ...listOfTableTexts,
-                                              if (pausingPlayersString.isNotEmpty)
+                                              if (pausingPlayersString
+                                                  .isNotEmpty)
                                                 Text(
                                                   'Pausing: $pausingPlayersString',
                                                   style: const TextStyle(
@@ -290,7 +315,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
                                     ),
                                   );
                                 },
-                                separatorBuilder: (context, index) => const SizedBox(height: 10),
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 10),
                               ),
                             ),
                           ],

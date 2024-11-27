@@ -10,6 +10,7 @@ class SimpleUser with _$SimpleUser {
     required String firstName,
     required String uid,
     required String colorCode,
+    @Default(false) bool surveySubmitted,
   }) = _SimpleUser;
 
   factory SimpleUser.fromJson(Map<String, dynamic> json) =>

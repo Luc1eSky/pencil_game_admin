@@ -10,12 +10,14 @@ import '../../user/presentation/user_list_view.dart';
 import '../domain/experiment.dart';
 
 class ExperimentDetailsScreen extends StatefulWidget {
-  const ExperimentDetailsScreen({super.key, required this.experiment, required this.docId});
+  const ExperimentDetailsScreen(
+      {super.key, required this.experiment, required this.docId});
   final Experiment experiment;
   final String docId;
 
   @override
-  State<ExperimentDetailsScreen> createState() => _ExperimentDetailsScreenState();
+  State<ExperimentDetailsScreen> createState() =>
+      _ExperimentDetailsScreenState();
 }
 
 class _ExperimentDetailsScreenState extends State<ExperimentDetailsScreen> {
@@ -37,7 +39,7 @@ class _ExperimentDetailsScreenState extends State<ExperimentDetailsScreen> {
                 builder: (context) {
                   return AddUserScreen(
                     experiment: widget.experiment,
-                    docId: widget.docId,
+                    userDocId: widget.docId,
                   );
                 },
               ),
@@ -51,10 +53,12 @@ class _ExperimentDetailsScreenState extends State<ExperimentDetailsScreen> {
         //indicatorColor: Colors.green,
         selectedIndex: pageIndex,
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.social_distance), label: 'Live View'),
+          NavigationDestination(
+              icon: Icon(Icons.social_distance), label: 'Live View'),
           NavigationDestination(icon: Icon(Icons.schedule), label: 'Schedule'),
           NavigationDestination(icon: Icon(Icons.group), label: 'Users'),
-          NavigationDestination(icon: Icon(Icons.person_add), label: 'Add User'),
+          NavigationDestination(
+              icon: Icon(Icons.person_add), label: 'Add User'),
         ],
       ),
       body: Center(

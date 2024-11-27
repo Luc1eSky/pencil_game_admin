@@ -11,7 +11,7 @@ class Admin with _$Admin {
   //const Admin._();
   const factory Admin({
     required String firstName,
-    required String flastName,
+    required String lastName,
     required List<String> experiments,
     required String adminUid,
     @TimestampConverter() required DateTime createdOn,

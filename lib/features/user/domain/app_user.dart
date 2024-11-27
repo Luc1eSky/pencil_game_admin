@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../utils/utils.dart';
+import '../../survey/domain/survey.dart';
 
 part 'app_user.freezed.dart';
 part 'app_user.g.dart';
@@ -15,6 +16,9 @@ class AppUser with _$AppUser {
     required String colorCode,
     required String experimentDocId,
     required int? currentTableNumber,
+    required Survey? survey,
+    @Default(false) bool surveySubmitted,
+    @Default(false) bool showSurvey,
     @TimestampConverter() required DateTime createdOn,
   }) = _AppUser;
 

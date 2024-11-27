@@ -8,11 +8,11 @@ class AddUserScreen extends StatelessWidget {
   const AddUserScreen({
     super.key,
     required this.experiment,
-    required this.docId,
+    required this.userDocId,
   });
 
   final Experiment experiment;
-  final String docId;
+  final String userDocId;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class AddUserScreen extends StatelessWidget {
                         builder: (context) {
                           return EnterUserDataScreen(
                             experiment: experiment,
-                            docId: docId,
+                            experimentDocId: userDocId,
                           );
                         },
                       ),

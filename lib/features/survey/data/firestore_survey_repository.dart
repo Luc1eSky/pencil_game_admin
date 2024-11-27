@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../constants.dart';
 import '../../../firestore/firestore_instance_provider.dart';
-import '../domain/survey.dart';
 
 class FirestoreSurveyRepository {
   FirestoreSurveyRepository(this._firestore);
@@ -11,43 +10,42 @@ class FirestoreSurveyRepository {
   final FirebaseFirestore _firestore;
 
   /// get survey stream
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getSurveyDocStream(String experimentDocId) {
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getSurveyDocStream(
+      String experimentDocId) {
     return _firestore
         .collection(experimentCollectionName)
         .doc(experimentDocId)
-        .collection(settingsCollectionName)
+        .collection('survey') // Todo: create variable for the collection
         .doc('survey')
         .snapshots();
   }
 
-  Future<void> addSurveyToExperiment({
-    required String experimentDocId,
-    required String surveyLink,
-  }) async {
-    final survey = Survey(surveyLink: surveyLink, showSurvey: false);
+// Future<void> addSurveyStatusToExperiment({
+//   required String experimentDocId,
+// }) async {
+//   const survey = Survey(showSurvey: false, gender: Gender.male);
+//
+//   // add a new document for the survey info in sub-collection
+//   await _firestore
+//       .collection(experimentCollectionName)
+//       .doc(experimentDocId)
+//       .collection(settingsCollectionName)
+//       .doc('survey')
+//       .set(survey.toJson());
+// }
 
-    // add a new document for the survey info in sub-collection
-    await _firestore
-        .collection(experimentCollectionName)
-        .doc(experimentDocId)
-        .collection(settingsCollectionName)
-        .doc('survey')
-        .set(survey.toJson());
-  }
-
-  Future<void> activateSurvey({
-    required String experimentDocId,
-  }) async {
-    // activate survey
-    await _firestore
-        .collection(experimentCollectionName)
-        .doc(experimentDocId)
-        .collection(settingsCollectionName)
-        .doc('survey')
-        .update({'showSurvey': true});
-  }
+//   Future<void> activateSurvey({
+//     required String experimentDocId,
+//   }) async {
+//     // change surveyStatus to true
+//     await _firestore
+//         .collection(experimentCollectionName)
+//         .doc(experimentDocId)
+//         .update({'showSurvey': true});
+//   }
 }
 
-final firestoreSurveyRepositoryProvider = Provider<FirestoreSurveyRepository>((ref) {
+final firestoreSurveyRepositoryProvider =
+    Provider<FirestoreSurveyRepository>((ref) {
   return FirestoreSurveyRepository(ref.watch(firestoreInstanceProvider));
 });

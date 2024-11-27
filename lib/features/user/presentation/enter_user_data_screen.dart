@@ -12,11 +12,11 @@ class EnterUserDataScreen extends StatefulWidget {
   const EnterUserDataScreen({
     super.key,
     required this.experiment,
-    required this.docId,
+    required this.experimentDocId,
   });
 
   final Experiment experiment;
-  final String docId;
+  final String experimentDocId;
 
   @override
   State<EnterUserDataScreen> createState() => _EnterUserDataScreenState();
@@ -134,8 +134,8 @@ class _EnterUserDataScreenState extends State<EnterUserDataScreen> {
                                                     .read(
                                                         firestoreUserRepositoryProvider)
                                                     .createUserShareCodeEntry(
-                                                      experimentDocId:
-                                                          widget.docId,
+                                                      experimentDocId: widget
+                                                          .experimentDocId,
                                                       firstName:
                                                           firstNameController
                                                               .text,

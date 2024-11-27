@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../utils/utils.dart';
+import '../../user/domain/app_user.dart';
 import '../../user/domain/simple_user.dart';
 import 'click.dart';
 import 'number_copy_result.dart';
@@ -22,5 +23,6 @@ class FirestoreResult with _$FirestoreResult {
     required List<NumberCopyResult> numberCopyResults,
   }) = _FirestoreResult;
 
-  factory FirestoreResult.fromJson(Map<String, dynamic> json) => _$FirestoreResultFromJson(json);
+  factory FirestoreResult.fromJson(Map<String, dynamic> json) =>
+      _$FirestoreResultFromJson(json);
 }
