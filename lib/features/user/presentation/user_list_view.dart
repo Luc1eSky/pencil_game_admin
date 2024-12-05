@@ -16,7 +16,9 @@ class UserListView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder(
-        stream: ref.read(firestoreProgressRepositoryProvider).getProgressDocStream(experimentDocId),
+        stream: ref
+            .read(firestoreProgressRepositoryProvider)
+            .getProgressDocStream(experimentDocId),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             debugPrint('Progress doc snapshot error.!');
@@ -34,13 +36,20 @@ class UserListView extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.all(20.0),
             child: FirestoreListView.separated(
-              query: ref.read(firestoreUserRepositoryProvider).getUsersQuery(experimentDocId),
-              errorBuilder: (context, error, stacktrace) => Text('Error: $error'),
+              query: ref
+                  .read(firestoreUserRepositoryProvider)
+                  .getUsersQuery(experimentDocId),
+              errorBuilder: (context, error, stacktrace) =>
+                  Text('Error: $error'),
               itemBuilder: (context, docSnap) {
                 final user = docSnap.data();
                 return Card(
+                  color: (user.surveySubmitted == true)
+                      ? Colors.green
+                      : Colors.grey,
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
                     leading: Text(
                       user.colorCode,
                       style: const TextStyle(
@@ -56,7 +65,8 @@ class UserListView extends ConsumerWidget {
                           style: const TextStyle(fontSize: 18),
                         ),
                         Text(
-                          DateFormat('MM-dd-yy\nhh:mm a').format(user.createdOn),
+                          DateFormat('MM-dd-yy\nhh:mm a')
+                              .format(user.createdOn),
                           style: const TextStyle(fontSize: 14),
                         ),
                       ],
